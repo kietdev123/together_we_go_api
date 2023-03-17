@@ -1,27 +1,11 @@
-const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const todoRoutes = require("./routes/todo.js")
+const http = require("http");
+const app = require("./app");
+const server = http.createServer(app);
 
-main()
-    .then((res) => console.log(res))
-    .catch((res) => console.log(err));
+const { API_PORT } = process.env;
+const port = process.env.PORT || API_PORT;
 
-async function main() {
-    await mongoose.connect("mongodb://localhost:27017/test")
-    console.log("Connect to mongodb successfully")
-}
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended : false}));
-
-app.get("/",(req, res) => {
-    res.send("hello world");
+// server listening 
+server.listen(port, () => {
+  console.log(`Server running on port ${port}`);
 });
-
-app.use("/api/todos", todoRoutes);
-
-app.listen(8080,() => {
-    console.log("listening on port 8080");
-})
