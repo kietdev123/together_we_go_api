@@ -4,6 +4,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const todoRoutes = require("./routes/todo.js")
 const authRoutes = require("./routes/auth.js")
+const uploadRoutes = require("./routes/upload.js")
 
 const app = express();
 
@@ -16,5 +17,7 @@ app.get("/",(req, res) => {
 
 app.use("/api/todos", todoRoutes);
 app.use("/api/auth",authRoutes);
+app.use("/api/upload",uploadRoutes);
+
 
 module.exports = app;
