@@ -9,3 +9,13 @@ const port = process.env.PORT || API_PORT;
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+// Connect socket (with cors, for web app)
+module.exports.io = require('socket.io')(server, {
+  cors: {
+    origin: '*',
+  }
+}
+);
+
+require('./sockets/socket');
