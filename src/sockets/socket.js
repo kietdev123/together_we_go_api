@@ -1,5 +1,8 @@
-const { userConnected, userDisconnected, saveMessage } = require('../controllers/socketController');
-const { verifyJWT } = require('../helpers/jwt');
+const { 
+    //userConnected, userDisconnected, 
+    //saveMessage 
+} = require('../controllers/socket');
+//const { verifyJWT } = require('../helpers/jwt');
 const{io} = require('../index');
 
 // sockets messages
