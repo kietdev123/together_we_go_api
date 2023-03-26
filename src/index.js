@@ -5,17 +5,16 @@ const server = http.createServer(app);
 const { API_PORT } = process.env;
 const port = process.env.PORT || API_PORT;
 
-// server listening 
+// server listening
 server.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
 // Connect socket (with cors, for web app)
-module.exports.io = require('socket.io')(server, {
+module.exports.io = require("socket.io")(server, {
   cors: {
-    origin: '*',
-  }
-}
-);
+    origin: "*",
+  },
+});
 
-require('./sockets/socket');
+require("./sockets/socket");
