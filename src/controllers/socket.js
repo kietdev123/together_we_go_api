@@ -1,5 +1,5 @@
 const User = require('../models/user')
-// const Message = require('../models/message');
+const Message = require('../models/message');
 
 // const userConnected = async (uid ='') =>{
 //     const user = await User.findById(uid);
@@ -17,21 +17,24 @@ const User = require('../models/user')
 //     return user;
 // };
 
-// const saveMessage = async(payload) =>{
-//     /*payload {from:'',to:'',message:''} */
-
-//     try {
-//         const message = Message(payload);
-//         await message.save();
-//         return true;
-//     } catch (error) {
-//         return false;
-//     }
-// }
+const saveMessage = async (payload) => {
+    try {
+        const message = Message({
+            chatRoomId: payload.chatRoomId,
+            userId: payload.userId,
+            message: payload.message,
+            type: payload.type,
+        });
+        await message.save();
+        return true;
+    } catch (error) {
+        return false;
+    }
+}
 
 
 module.exports = {
     //userConnected,
     //userDisconnected,
-    //saveMessage
+    saveMessage,
 }
