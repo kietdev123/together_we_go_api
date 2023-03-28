@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   avatarUrl: {
     type: String,
     default:
-      "https://asset.cloudinary.com/dxoblxypq/8784fb5ee7e064f8dd5831894418141a",
+      "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
     // default link save in cloudinary
   },
 });

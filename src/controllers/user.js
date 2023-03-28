@@ -3,10 +3,12 @@ const User = require("../models/user");
 exports.editAvatar = async (req, res, next) => {
   try {
     var userId = req.params.userId;
+    console.log(userId);
+    var user = await User.findById(userId);
 
-    var user = User.findById(userId);
+    console.log(user);
 
-    user.avatarUrl = req.body.avatarUrl;
+    user.avatarUrl = req.body.avatar_url;
 
     await user.save();
     res.status(200).json({

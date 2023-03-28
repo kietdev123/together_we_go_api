@@ -22,6 +22,6 @@ app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
 app.use("/api/chat_room", chatRoomRoutes);
 app.use("/api/message", messageRoutes);
-app.use("/api/user", messageRoutes);
+app.use("/api/user", userRoutes);
 
 module.exports = app;
