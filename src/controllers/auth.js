@@ -30,6 +30,9 @@ exports.register = async (req, res, next) => {
       last_name,
       email: email.toLowerCase(), // sanitize: convert email to lowercase
       password: encryptedPassword,
+      // Add default avatar
+      avatarUrl:
+        "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
     });
 
     // return new user
@@ -79,6 +82,7 @@ exports.login = async (req, res, next) => {
         user_id: user.id,
         user_name: user.first_name,
         user_email: user.email,
+        user_avatar: user.avatarUrl,
       });
     } else {
       res.status(400).send("Invalid Credentials");

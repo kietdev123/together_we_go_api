@@ -69,6 +69,8 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
       },
     ]);
 
+    console.log(result);
+
     var customJsons = [];
     for (var i = 0; i < result.length; i++) {
       newChatRoom = result[i];
@@ -82,17 +84,18 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
           id: newChatRoom._id,
           partner_name: newChatRoom.user2.first_name,
           partner_gmail: newChatRoom.user2.email,
+          partner_avatar: newChatRoom.user2.avatarUrl,
         };
       } else {
         finalChatRoom = {
           id: newChatRoom._id,
           partner_name: newChatRoom.user1.first_name,
           partner_gmail: newChatRoom.user1.email,
+          partner_avatar: newChatRoom.user1.avatarUrl,
         };
       }
       result[i] = finalChatRoom;
     }
-    // console.log(result);
 
     res.status(200).json(result);
   } catch (error) {
