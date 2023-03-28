@@ -76,6 +76,9 @@ exports.login = async (req, res, next) => {
       res.status(200).json({
         accsess_token: access_token,
         refresh_token: refresh_token,
+        user_id: user.id,
+        user_name: user.first_name,
+        user_email: user.email,
       });
     } else {
       res.status(400).send("Invalid Credentials");
