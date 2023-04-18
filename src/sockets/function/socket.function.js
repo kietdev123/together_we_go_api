@@ -5,7 +5,6 @@ const userConnected = async (uid = "", socket_id) => {
   const user = await User.findById(uid);
   user.online = true;
   user.time = new Date();
-  user.socket_id = socket_id;
   await user.save();
   return user;
 };

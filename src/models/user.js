@@ -16,7 +16,6 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   time: { type: Date },
-  socket_id: { type: String },
 });
 
 module.exports = mongoose.model("user", userSchema);
