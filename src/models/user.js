@@ -11,6 +11,11 @@ const userSchema = new mongoose.Schema({
       "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
     // default link save in cloudinary
   },
+  online: {
+    type: Boolean,
+    default: false,
+  },
+  time: { type: Date },
 });
 
 module.exports = mongoose.model("user", userSchema);

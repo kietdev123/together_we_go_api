@@ -73,7 +73,7 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
 
     var customJsons = [];
     for (var i = 0; i < result.length; i++) {
-      newChatRoom = result[i];
+      var newChatRoom = result[i];
 
       newChatRoom.user1 = newChatRoom.user1[0];
       newChatRoom.user2 = newChatRoom.user2[0];
@@ -85,6 +85,7 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
           partner_name: newChatRoom.user2.first_name,
           partner_gmail: newChatRoom.user2.email,
           partner_avatar: newChatRoom.user2.avatarUrl,
+          partner_id: newChatRoom.user2._id,
         };
       } else {
         finalChatRoom = {
@@ -92,11 +93,12 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
           partner_name: newChatRoom.user1.first_name,
           partner_gmail: newChatRoom.user1.email,
           partner_avatar: newChatRoom.user1.avatarUrl,
+          partner_id: newChatRoom.user1._id,
         };
       }
       result[i] = finalChatRoom;
     }
-
+    console.log(result);
     res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
