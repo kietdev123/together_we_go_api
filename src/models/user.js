@@ -15,6 +15,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
+  online: {
+    type: Boolean,
+    default: false,
+  },
+  time: { type: Date },
 });
 
 module.exports = mongoose.model("user", userSchema);
