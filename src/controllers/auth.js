@@ -93,6 +93,60 @@ exports.login = async (req, res, next) => {
   // Our register logic ends here
 };
 
+exports.loginWithGoogle = async (req, res, next) => {
+  try {
+    // Get user input
+    const { email, name, avatar } = req.body;
+
+    // Validate if user exist in our database
+    var user = await User.findOne({ email });
+
+    if (!user) {
+      var encryptedPassword = await bcrypt.hash(
+        "togerther_we_go_default_password",
+        10
+      );
+
+      user = await User.create({
+        email: email,
+        first_name: name,
+        password: encryptedPassword,
+        avatarUrl: avatar,
+      });
+    }
+
+    // Create token
+    const access_token = jwt.sign(
+      { user_id: user._id, email },
+      process.env.ACCESS_TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
+
+    // Create token
+    const refresh_token = jwt.sign(
+      { user_id: user._id, email },
+      process.env.REFRESH_TOKEN_KEY,
+      {
+        expiresIn: "30d",
+      }
+    );
+
+    // user
+    res.status(200).json({
+      accsess_token: access_token,
+      refresh_token: refresh_token,
+      user_id: user.id,
+      user_name: user.first_name,
+      user_email: user.email,
+      user_avatar: user.avatarUrl,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 exports.refresh = async (req, res, next) => {
   try {
     const token = req.body.refresh_token;
