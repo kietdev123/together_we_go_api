@@ -33,6 +33,7 @@ exports.register = async (req, res, next) => {
       // Add default avatar
       avatarUrl:
         "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
+      phoneNumber,
     });
 
     // return new user
