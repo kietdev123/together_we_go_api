@@ -8,6 +8,8 @@ router.post("/register", authController.register);
 router.post("/login", authController.login);
 router.post("/loginWithGoogle", authController.loginWithGoogle);
 
+router.post("/resetPassword", authController.resetPassword);
+
 router.post("/refresh", authController.refresh);
 
 router.post("/welcome", auth, (req, res) => {
