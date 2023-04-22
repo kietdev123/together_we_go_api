@@ -179,3 +179,21 @@ exports.refresh = async (req, res, next) => {
     console.log(err);
   }
 };
+
+exports.resetPassword = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate if user exist in our database
+    var user = await User.findOne({ email });
+
+    var encryptedPassword = await bcrypt.hash(password, 10);
+
+    user.password = encryptedPassword;
+    await user.save();
+    res.status(200).json({});
+  } catch (err) {
+    console.log(err);
+    return res.status(401).send("Reset Failded");
+  }
+};
