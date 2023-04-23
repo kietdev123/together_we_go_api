@@ -20,6 +20,8 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   time: { type: Date },
+  birth_date: { type: String },
+  gender: { type: String, default: "male" }, // "male" or "female"
 });
 
 module.exports = mongoose.model("user", userSchema);
