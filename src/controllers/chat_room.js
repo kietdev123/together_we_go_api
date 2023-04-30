@@ -4,8 +4,10 @@ const User = require("../models/user");
 
 exports.createChatRoom = (req, res, next) => {
   const chat_room = new ChatRoom({
-    userId_1: req.body.userId_1,
-    userId_2: req.body.userId_2,
+    userId_1: new mongoose.Types.ObjectId(req.body.userId_1),
+    userId_2: new mongoose.Types.ObjectId(req.body.userId_2),
+    user1: new mongoose.Types.ObjectId(req.body.userId_1),
+    user2: new mongoose.Types.ObjectId(req.body.userId_2),
   });
   chat_room
     .save()
@@ -105,3 +107,16 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
   }
 };
 //End region
+
+exports.getOne = async (req, res) => {
+  try {
+    var chatRoom = await ChatRoom.findById(req.params.chatRoomId)
+      // .populate("user1", { id: 1, first_name: 1 })
+      // .populate("user2", { id: 1, first_name: 1 });
+      .populate("user1")
+      .populate("user2");
+    res.status(200).json(chatRoom);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
