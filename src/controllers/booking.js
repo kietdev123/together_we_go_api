@@ -8,10 +8,14 @@ exports.createBooking = (req, res) => {
     bookingType: req.body.bookingType,
     time: req.body.time,
     content: req.body.content,
-    startPoint: req.body.startPoint,
+    startPointId: req.body.startPointId,
+    startPointMainText: req.body.startPointMainText,
     startPointAddress: req.body.startPointAddress,
-    endPoint: req.body.endPoint,
+    endPointId: req.body.endPointId,
+    endPointMainText: req.body.endPointMainText,
     endPointAddress: req.body.endPointAddress,
+    duration: req.body.duration,
+    distance: req.body.distance,
   });
   console.log(booking);
   booking
