@@ -1,5 +1,6 @@
 const User = require("../../models/user");
 const Message = require("../../models/message");
+const ChatRoom = require("../../models/chat_room");
 
 const userConnected = async (uid = "", socket_id) => {
   const user = await User.findById(uid);
@@ -30,7 +31,13 @@ const saveMessage = async (payload) => {
       message: payload.message,
       type: payload.type,
     });
-    await message.save();
+    var newMessage = await message.save();
+    console.log(newMessage);
+
+    var chatRoom = await ChatRoom.findById(payload.chatRoomId);
+    chatRoom.lastMessage = newMessage._id;
+    await chatRoom.save();
+
     return true;
   } catch (error) {
     return false;
