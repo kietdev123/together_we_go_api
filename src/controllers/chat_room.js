@@ -35,50 +35,59 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
     // var chatRoom = await ChatRoom.find({ userId_1: userId });
     // console.log(chatRoom);
 
-    const result = await ChatRoom.aggregate([
-      {
-        $match: {
-          $or: [
-            { userId_1: new mongoose.Types.ObjectId(userId) },
-            { userId_2: new mongoose.Types.ObjectId(userId) },
-          ],
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId_1",
-          foreignField: "_id",
-          as: "user1",
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId_2",
-          foreignField: "_id",
-          as: "user2",
-        },
-      },
-      {
-        $project: {
-          _id: 1, // "1" means on
-          userId_1: 1,
-          userId_2: 1,
-          user1: 1, // "0" means off
-          user2: 1,
-        },
-      },
-    ]);
+    // const result = await ChatRoom.aggregate([
+    //   {
+    //     $match: {
+    //       $or: [
+    //         { userId_1: new mongoose.Types.ObjectId(userId) },
+    //         { userId_2: new mongoose.Types.ObjectId(userId) },
+    //       ],
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users",
+    //       localField: "userId_1",
+    //       foreignField: "_id",
+    //       as: "user1",
+    //     },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "users",
+    //       localField: "userId_2",
+    //       foreignField: "_id",
+    //       as: "user2",
+    //     },
+    //   },
+    //   {
+    //     $project: {
+    //       _id: 1, // "1" means on
+    //       userId_1: 1,
+    //       userId_2: 1,
+    //       user1: 1, // "0" means off
+    //       user2: 1,
+    //     },
+    //   },
+    // ]);
 
-    console.log(result);
+    // console.log(result);
 
-    var customJsons = [];
+    var result = await ChatRoom.find({
+      $or: [
+        { userId_1: new mongoose.Types.ObjectId(userId) },
+        { userId_2: new mongoose.Types.ObjectId(userId) },
+      ],
+    })
+      .populate("user1")
+      .populate("user2")
+      .populate("lastMessage");
+
+    // console.log(result);
+    var customChatRoom = [];
+
     for (var i = 0; i < result.length; i++) {
       var newChatRoom = result[i];
-
-      newChatRoom.user1 = newChatRoom.user1[0];
-      newChatRoom.user2 = newChatRoom.user2[0];
 
       var finalChatRoom = {};
       if (newChatRoom.userId_1 == userId) {
@@ -88,6 +97,8 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
           partner_gmail: newChatRoom.user2.email,
           partner_avatar: newChatRoom.user2.avatarUrl,
           partner_id: newChatRoom.user2._id,
+          num_unwatch: newChatRoom.num_unwatched_1,
+          lastMessage: newChatRoom.lastMessage,
         };
       } else {
         finalChatRoom = {
@@ -96,9 +107,19 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
           partner_gmail: newChatRoom.user1.email,
           partner_avatar: newChatRoom.user1.avatarUrl,
           partner_id: newChatRoom.user1._id,
+          num_unwatch: newChatRoom.num_unwatched_2,
+          lastMessage: newChatRoom.lastMessage,
+        };
+      }
+      if (finalChatRoom.lastMessage == undefined) {
+        finalChatRoom.lastMessage = {
+          message: "Hộp thoại trống",
+          type: "isText",
+          createdAt: new Date().toISOString(),
         };
       }
       result[i] = finalChatRoom;
+      customChatRoom.push(finalChatRoom);
     }
     console.log(result);
     res.status(200).json(result);
