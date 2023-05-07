@@ -17,6 +17,7 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
     try {
       console.log(data);
       var partner_id = data["partner_id"];
+      var call_type = data["call_type"];
       console.log("partner_id :", partner_id);
 
       var partner_socket_id = await getSocketId(partner_id);
@@ -40,6 +41,7 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
           partner_id: partner_id,
           partner_name: partner.first_name,
           partner_avatar: partner.avatarUrl,
+          call_type: call_type,
         });
       }
 
@@ -55,6 +57,7 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
           partner_id: current_user_id,
           partner_name: current_user.first_name,
           partner_avatar: current_user.avatarUrl,
+          call_type: call_type,
         });
       }
 
