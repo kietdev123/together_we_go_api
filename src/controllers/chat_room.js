@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const ChatRoom = require("../models/chat_room");
 const User = require("../models/user");
+const chat_room = require("../models/chat_room");
 
 exports.createChatRoom = (req, res, next) => {
   const chat_room = new ChatRoom({
@@ -135,8 +136,82 @@ exports.getOne = async (req, res) => {
       // .populate("user1", { id: 1, first_name: 1 })
       // .populate("user2", { id: 1, first_name: 1 });
       .populate("user1")
-      .populate("user2");
+      .populate("user2")
+      .populate("lastMessage");
     res.status(200).json(chatRoom);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+
+exports.getChatRoomInBooking = async (req, res) => {
+  try {
+    console.log(req.params);
+    var chatRoom = await ChatRoom.findOne({
+      $or: [
+        { userId_1: req.params.posterId, userId_2: req.params.current_user_id },
+        { userId_2: req.params.posterId, userId_1: req.params.current_user_id },
+      ],
+    })
+      // .populate("user1", { id: 1, first_name: 1 })
+      // .populate("user2", { id: 1, first_name: 1 });
+      .populate("user1")
+      .populate("user2")
+      .populate("lastMessage");
+
+    console.log("kiet ", chatRoom);
+
+    if (chatRoom == null) {
+      console.log("heelo");
+      chatRoom = new ChatRoom({
+        userId_1: new mongoose.Types.ObjectId(req.params.posterId),
+        userId_2: new mongoose.Types.ObjectId(req.params.current_user_id),
+        user1: new mongoose.Types.ObjectId(req.params.posterId),
+        user2: new mongoose.Types.ObjectId(req.params.current_user_id),
+      });
+      await chatRoom.save();
+
+      chatRoom = await ChatRoom.findOne({
+        $or: [
+          {
+            userId_1: req.params.posterId,
+            userId_2: req.params.current_user_id,
+          },
+          {
+            userId_2: req.params.posterId,
+            userId_1: req.params.current_user_id,
+          },
+        ],
+      })
+        // .populate("user1", { id: 1, first_name: 1 })
+        // .populate("user2", { id: 1, first_name: 1 });
+        .populate("user1")
+        .populate("user2")
+        .populate("lastMessage");
+    }
+    var newChatRoom = chatRoom;
+
+    var finalChatRoom = {};
+
+    finalChatRoom = {
+      id: newChatRoom._id,
+      partner_name: newChatRoom.user2.first_name,
+      partner_gmail: newChatRoom.user2.email,
+      partner_avatar: newChatRoom.user2.avatarUrl,
+      partner_id: newChatRoom.user2._id,
+      num_unwatch: newChatRoom.num_unwatched_1,
+      lastMessage: newChatRoom.lastMessage,
+    };
+
+    if (finalChatRoom.lastMessage == undefined) {
+      finalChatRoom.lastMessage = {
+        message: "Hộp thoại trống",
+        type: "isText",
+        createdAt: new Date().toISOString(),
+      };
+    }
+
+    res.status(200).json(finalChatRoom);
   } catch (e) {
     res.status(400).json({ message: e.message });
   }
