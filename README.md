@@ -24,9 +24,7 @@ TogetherWeGo_API is server of project TogetherWeGo (https://github.com/quanminh2
 
 ## Technology
 
-Frontend : Flutter(https://github.com/kiet-kun/together_we_go_api)
-Backend : NodeJs 
-Database : MongoDb 
+NodeJs, MongoDb
 
 ## Features
 
