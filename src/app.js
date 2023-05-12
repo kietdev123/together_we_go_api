@@ -9,6 +9,7 @@ const chatRoomRoutes = require("./routes/chat_room.js");
 const messageRoutes = require("./routes/message.js");
 const userRoutes = require("./routes/user.js");
 const bookingRoutes = require("./routes/booking.js");
+const applyRoutes = require("./routes/apply.js");
 const app = express();
 
 app.use(bodyParser.json());
@@ -25,4 +26,5 @@ app.use("/api/chat_room", chatRoomRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/booking", bookingRoutes);
+app.use("/api/apply", applyRoutes);
 module.exports = app;

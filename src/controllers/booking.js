@@ -49,3 +49,14 @@ exports.getListAvailableBookings = async (req, res) => {
     res.status(400).json({ message: e.message });
   }
 };
+
+exports.getMyBookings = async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      authorId: req.params.userId,
+    }).populate("authorId");
+    res.status(200).json(bookings);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
