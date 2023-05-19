@@ -1,6 +1,7 @@
 const Booking = require("../models/booking.js");
 const mongoose = require("mongoose");
 exports.createBooking = (req, res) => {
+  console.log("create booking");
   const booking = new Booking({
     authorId: req.params.userId,
     price: req.body.price,

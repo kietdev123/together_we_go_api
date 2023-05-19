@@ -193,15 +193,27 @@ exports.getChatRoomInBooking = async (req, res) => {
 
     var finalChatRoom = {};
 
-    finalChatRoom = {
-      id: newChatRoom._id,
-      partner_name: newChatRoom.user2.first_name,
-      partner_gmail: newChatRoom.user2.email,
-      partner_avatar: newChatRoom.user2.avatarUrl,
-      partner_id: newChatRoom.user2._id,
-      num_unwatch: newChatRoom.num_unwatched_1,
-      lastMessage: newChatRoom.lastMessage,
-    };
+    if (newChatRoom.user2._id == req.params.posterId) {
+      finalChatRoom = {
+        id: newChatRoom._id,
+        partner_name: newChatRoom.user2.first_name,
+        partner_gmail: newChatRoom.user2.email,
+        partner_avatar: newChatRoom.user2.avatarUrl,
+        partner_id: newChatRoom.user2._id,
+        num_unwatch: newChatRoom.num_unwatched_1,
+        lastMessage: newChatRoom.lastMessage,
+      };
+    } else {
+      finalChatRoom = {
+        id: newChatRoom._id,
+        partner_name: newChatRoom.user1.first_name,
+        partner_gmail: newChatRoom.user1.email,
+        partner_avatar: newChatRoom.user1.avatarUrl,
+        partner_id: newChatRoom.user1._id,
+        num_unwatch: newChatRoom.num_unwatched_1,
+        lastMessage: newChatRoom.lastMessage,
+      };
+    }
 
     if (finalChatRoom.lastMessage == undefined) {
       finalChatRoom.lastMessage = {
