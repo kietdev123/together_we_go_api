@@ -26,6 +26,14 @@ const Booking = new mongoose.Schema({
     type: String,
     require: true,
   },
+  startPointLat: {
+    type: String,
+    require: true,
+  },
+  startPointLong: {
+    type: String,
+    require: true,
+  },
   startPointId: {
     type: String,
     require: true,
@@ -35,6 +43,14 @@ const Booking = new mongoose.Schema({
     require: true,
   },
   startPointAddress: {
+    type: String,
+    require: true,
+  },
+  endPointLat: {
+    type: String,
+    require: true,
+  },
+  endPointLong: {
     type: String,
     require: true,
   },
