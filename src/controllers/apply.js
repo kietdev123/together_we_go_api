@@ -51,7 +51,12 @@ exports.getMyApply = async (req, res, next) => {
 
     var applys = await Apply.find({ applyer: applyerId })
       .populate("applyer")
-      .populate("booking");
+      .populate({
+        path: "booking",
+        populate: {
+          path: "authorId",
+        },
+      });
 
     res.status(200).json(applys);
   } catch (err) {
@@ -68,7 +73,12 @@ exports.getApplyBooking = async (req, res, next) => {
 
     var applys = await Apply.find({ booking: bookingId })
       .populate("applyer")
-      .populate("booking");
+      .populate({
+        path: "booking",
+        populate: {
+          path: "authorId",
+        },
+      });
 
     res.status(200).json(applys);
   } catch (err) {
