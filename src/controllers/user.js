@@ -68,3 +68,23 @@ exports.updateUser = async (req, res, next) => {
     });
   }
 };
+
+exports.updateUserLocation = async (req, res, next) => {
+  try {
+    var userId = req.params.userId;
+    console.log(userId);
+    var user = await User.findById(userId);
+    console.log(req.body);
+    user.location_id = req.body.location_id;
+    user.location_mainText = req.body.location_mainText;
+    user.location_address = req.body.location_address;
+    await user.save();
+    res.status(200).json({
+      message: "pass",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "error",
+    });
+  }
+};
