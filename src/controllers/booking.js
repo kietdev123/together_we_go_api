@@ -39,7 +39,7 @@ exports.createBooking = (req, res) => {
 };
 exports.getAllListBooking = async (req, res) => {
   try {
-    const bookings = await Booking.find().populate("authorId");
+    const bookings = await Booking.find().populate("authorId").sort({'createdAt':-1});
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -49,7 +49,7 @@ exports.getListAvailableBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({ status: "complete" }).populate(
       "authorId"
-    );
+    ).sort({'createdAt':-1});
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -60,7 +60,8 @@ exports.getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({
       authorId: req.params.userId,
-    }).populate("authorId");
+    }).populate("authorId")
+    .sort({'createdAt':-1});
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });

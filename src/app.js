@@ -1,7 +1,14 @@
+// import environment variable
 require("dotenv").config();
+
+// import database
 require("./config/database").connect();
+
+
 const express = require("express");
 const bodyParser = require("body-parser");
+
+// import routes
 const todoRoutes = require("./routes/todo.js");
 const authRoutes = require("./routes/auth.js");
 const uploadRoutes = require("./routes/upload.js");
@@ -11,7 +18,13 @@ const userRoutes = require("./routes/user.js");
 const bookingRoutes = require("./routes/booking.js");
 const applyRoutes = require("./routes/apply.js");
 const reviewRoutes = require("./routes/review.js");
+
 const app = express();
+
+// import swagger
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = require('./config/swagger/index.js');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
