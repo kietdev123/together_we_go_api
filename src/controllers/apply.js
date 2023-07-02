@@ -1,8 +1,18 @@
 const mongoose = require("mongoose");
 
 const Apply = require("../models/apply");
+const Booking = require("../models/booking");
 
-exports.createApply = (req, res, next) => {
+exports.createApply = async (req, res, next) => {
+  const booking = await Booking.findById(req.body.booking_id);
+
+  if (booking.authorId == req.body.applyer_Id){
+    res.status(400).json({
+      message: "Can not apply to your booking!",
+    });
+    return;
+  }
+  
   const apply = new Apply({
     applyer: new mongoose.Types.ObjectId(req.body.applyer_Id),
     note: req.body.note,
@@ -56,7 +66,9 @@ exports.getMyApply = async (req, res, next) => {
         populate: {
           path: "authorId",
         },
-      });
+      })
+      .sort({'createdAt':-1});
+  
 
     res.status(200).json(applys);
   } catch (err) {
@@ -78,7 +90,8 @@ exports.getApplyBooking = async (req, res, next) => {
         populate: {
           path: "authorId",
         },
-      });
+      })
+      .sort({'createdAt':-1});
 
     res.status(200).json(applys);
   } catch (err) {
