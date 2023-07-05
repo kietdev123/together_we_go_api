@@ -101,3 +101,22 @@ exports.getApplyBooking = async (req, res, next) => {
     });
   }
 };
+exports.getBookingInApply = async (req, res, next) => {
+  try {
+    var applyId = req.params.applyId;
+
+    var apply = await Apply.findById(applyId).populate({
+      path: "booking",
+      populate: {
+        path: "authorId",
+      },
+    });
+
+    res.status(200).json(apply);
+  } catch (err) {
+    res.status(500).json({
+      title: "error",
+      message: err.message,
+    });
+  }
+};
