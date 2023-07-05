@@ -8,11 +8,24 @@ exports.createApply = async (req, res, next) => {
 
   if (booking.authorId == req.body.applyer_Id){
     res.status(400).json({
-      message: "Can not apply to your booking!",
+      message: "Không thể tham gia vào chuyến đi của bạn, vui lòng chọn chuyến khác!",
     });
     return;
   }
   
+  const oldApply = await Apply.findOne({
+    applyer: new mongoose.Types.ObjectId(req.body.applyer_Id),
+    booking: new mongoose.Types.ObjectId(req.body.booking_id),
+    state: "waiting",
+  });
+
+  if (oldApply != null && oldApply != undefined) {
+    res.status(400).json({
+      message: "Bạn đã apply vào chuyến đi này rồi !",
+    });
+    return;
+  }
+
   const apply = new Apply({
     applyer: new mongoose.Types.ObjectId(req.body.applyer_Id),
     note: req.body.note,
@@ -42,8 +55,13 @@ exports.updateApply = async (req, res, next) => {
   try {
     var applyId = req.params.id;
 
-    await Apply.findByIdAndUpdate(applyId, req.body);
+    const apply = await Apply.findByIdAndUpdate(applyId, req.body)
+    .populate("booking");
 
+    if (req.body.state == "close") {
+      await Booking.findByIdAndUpdate(apply.booking._id, {status : 'complete'});
+    }
+    
     res.status(200).json({
       title: "pass",
     });
