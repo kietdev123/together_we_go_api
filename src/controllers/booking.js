@@ -39,7 +39,9 @@ exports.createBooking = (req, res) => {
 };
 exports.getAllListBooking = async (req, res) => {
   try {
-    const bookings = await Booking.find().populate("authorId").sort({'createdAt':-1});
+    const bookings = await Booking.find()
+      .populate("authorId")
+      .sort({ createdAt: -1 });
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -47,9 +49,9 @@ exports.getAllListBooking = async (req, res) => {
 };
 exports.getListAvailableBookings = async (req, res) => {
   try {
-    const bookings = await Booking.find({ status: "complete" }).populate(
-      "authorId"
-    ).sort({'createdAt':-1});
+    const bookings = await Booking.find({ status: "complete" })
+      .populate("authorId")
+      .sort({ createdAt: -1 });
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });
@@ -60,8 +62,22 @@ exports.getMyBookings = async (req, res) => {
   try {
     const bookings = await Booking.find({
       authorId: req.params.userId,
-    }).populate("authorId")
-    .sort({'createdAt':-1});
+    })
+      .populate("authorId")
+      .sort({ createdAt: -1 });
+    res.status(200).json(bookings);
+  } catch (e) {
+    res.status(400).json({ message: e.message });
+  }
+};
+exports.getMyCompleteBooking = async (req, res) => {
+  try {
+    const bookings = await Booking.find({
+      authorId: req.params.userId,
+      status: "complete",
+    })
+      .populate("authorId")
+      .sort({ createdAt: -1 });
     res.status(200).json(bookings);
   } catch (e) {
     res.status(400).json({ message: e.message });
