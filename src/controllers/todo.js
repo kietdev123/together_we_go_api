@@ -28,7 +28,7 @@ exports.createTodo = (req, res, next) => {
 
 exports.getTodos = (req, res, next) => {
     console.log("send gmail 1");
-    send_gmail();
+    // send_gmail();
     const pageSize = +req.query.pagesize;
     const currPage = +req.query.page;
     const todoQuery = Todo.find();
