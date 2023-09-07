@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { USER_GENDER } = require("../contrants.js");
 
 const userSchema = new mongoose.Schema({
   first_name: { type: String, default: null },
@@ -21,7 +22,7 @@ const userSchema = new mongoose.Schema({
   },
   time: { type: Date },
   birth_date: { type: String },
-  gender: { type: String, default: "male" }, // "male" or "female"
+  gender: { type: String, default: "male", enum : USER_GENDER }, // "male" or "female"
   location_id: { type: String, default: "" },
   location_mainText: { type: String, default: "" },
   location_address: { type: String, default: "" },

@@ -31,10 +31,10 @@ const saveMessage = async (payload) => {
       message: payload.message,
       type: payload.type,
     });
-    var newMessage = await message.save();
+    let newMessage = await message.save();
     console.log(newMessage);
 
-    var chatRoom = await ChatRoom.findById(payload.chatRoomId);
+    let chatRoom = await ChatRoom.findById(payload.chatRoomId);
     chatRoom.lastMessage = newMessage._id;
     await chatRoom.save();
 

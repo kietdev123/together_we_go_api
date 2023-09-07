@@ -53,7 +53,7 @@ exports.createApply = async (req, res, next) => {
 
 exports.updateApply = async (req, res, next) => {
   try {
-    var applyId = req.params.id;
+    let applyId = req.params.id;
 
     const apply = await Apply.findByIdAndUpdate(applyId, req.body)
     .populate("booking");
@@ -75,9 +75,9 @@ exports.updateApply = async (req, res, next) => {
 
 exports.getMyApply = async (req, res, next) => {
   try {
-    var applyerId = req.params.userId;
+    let applyerId = req.params.userId;
 
-    var applys = await Apply.find({ applyer: applyerId })
+    let applys = await Apply.find({ applyer: applyerId })
       .populate("applyer")
       .populate({
         path: "booking",
@@ -99,9 +99,9 @@ exports.getMyApply = async (req, res, next) => {
 
 exports.getApplyBooking = async (req, res, next) => {
   try {
-    var bookingId = req.params.bookingId;
+    let bookingId = req.params.bookingId;
 
-    var applys = await Apply.find({ booking: bookingId })
+    let applys = await Apply.find({ booking: bookingId })
       .populate("applyer")
       .populate({
         path: "booking",
@@ -121,9 +121,9 @@ exports.getApplyBooking = async (req, res, next) => {
 };
 exports.getBookingInApply = async (req, res, next) => {
   try {
-    var applyId = req.params.applyId;
+    let applyId = req.params.applyId;
 
-    var apply = await Apply.findById(applyId).populate({
+    let apply = await Apply.findById(applyId).populate({
       path: "booking",
       populate: {
         path: "authorId",

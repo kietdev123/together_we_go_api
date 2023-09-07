@@ -1,4 +1,4 @@
-var client_peerIds = {};
+let client_peerIds = {};
 
 const getClientPeerId = async (uid = "") => {
   return client_peerIds[uid];

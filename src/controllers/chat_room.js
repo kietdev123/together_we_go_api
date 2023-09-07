@@ -33,7 +33,7 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
     const userId = req.params.userId;
     console.log(userId);
 
-    // var chatRoom = await ChatRoom.find({ userId_1: userId });
+    // let chatRoom = await ChatRoom.find({ userId_1: userId });
     // console.log(chatRoom);
 
     // const result = await ChatRoom.aggregate([
@@ -74,7 +74,7 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
 
     // console.log(result);
 
-    var result = await ChatRoom.find({
+    let result = await ChatRoom.find({
       $or: [
         { userId_1: new mongoose.Types.ObjectId(userId) },
         { userId_2: new mongoose.Types.ObjectId(userId) },
@@ -85,12 +85,12 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
       .populate("lastMessage");
 
     // console.log(result);
-    var customChatRoom = [];
+    let customChatRoom = [];
 
-    for (var i = 0; i < result.length; i++) {
-      var newChatRoom = result[i];
+    for (let i = 0; i < result.length; i++) {
+      let newChatRoom = result[i];
 
-      var finalChatRoom = {};
+      let finalChatRoom = {};
       if (newChatRoom.userId_1 == userId) {
         finalChatRoom = {
           id: newChatRoom._id,
@@ -132,7 +132,7 @@ exports.getAllChatRoomWithUserId = async (req, res) => {
 
 exports.getOne = async (req, res) => {
   try {
-    var chatRoom = await ChatRoom.findById(req.params.chatRoomId)
+    let chatRoom = await ChatRoom.findById(req.params.chatRoomId)
       // .populate("user1", { id: 1, first_name: 1 })
       // .populate("user2", { id: 1, first_name: 1 });
       .populate("user1")
@@ -147,7 +147,7 @@ exports.getOne = async (req, res) => {
 exports.getChatRoomInBooking = async (req, res) => {
   try {
     console.log(req.params);
-    var chatRoom = await ChatRoom.findOne({
+    let chatRoom = await ChatRoom.findOne({
       $or: [
         { userId_1: req.params.posterId, userId_2: req.params.current_user_id },
         { userId_2: req.params.posterId, userId_1: req.params.current_user_id },
@@ -189,9 +189,9 @@ exports.getChatRoomInBooking = async (req, res) => {
         .populate("user2")
         .populate("lastMessage");
     }
-    var newChatRoom = chatRoom;
+    let newChatRoom = chatRoom;
 
-    var finalChatRoom = {};
+    let finalChatRoom = {};
 
     if (newChatRoom.user2._id == req.params.posterId) {
       finalChatRoom = {

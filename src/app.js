@@ -1,4 +1,4 @@
-// import environment variable
+// import environment letiable
 require("dotenv").config();
 
 // import database

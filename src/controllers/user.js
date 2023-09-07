@@ -2,9 +2,9 @@ const User = require("../models/user");
 
 exports.editAvatar = async (req, res, next) => {
   try {
-    var userId = req.params.userId;
+    let userId = req.params.userId;
     console.log(userId);
-    var user = await User.findById(userId);
+    let user = await User.findById(userId);
 
     console.log(user);
 
@@ -23,13 +23,13 @@ exports.editAvatar = async (req, res, next) => {
 
 exports.getUser = async (req, res, next) => {
   try {
-    var userId = req.params.userId;
+    let userId = req.params.userId;
     console.log(userId);
-    var user = await User.findById(userId);
+    let user = await User.findById(userId);
 
-    var name = user.first_name;
-    var gender = user.gender;
-    var birth_date;
+    let name = user.first_name;
+    let gender = user.gender;
+    let birth_date;
     if (user.birth_date == undefined) {
       birth_date = "";
     } else {
@@ -50,9 +50,9 @@ exports.getUser = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   try {
-    var userId = req.params.userId;
+    let userId = req.params.userId;
     console.log(userId);
-    var user = await User.findById(userId);
+    let user = await User.findById(userId);
     console.log(req.body);
     user.first_name = req.body.name;
     user.gender = req.body.gender;
@@ -71,9 +71,9 @@ exports.updateUser = async (req, res, next) => {
 
 exports.updateUserLocation = async (req, res, next) => {
   try {
-    var userId = req.params.userId;
+    let userId = req.params.userId;
     console.log(userId);
-    var user = await User.findById(userId);
+    let user = await User.findById(userId);
     console.log(req.body);
     user.location_id = req.body.location_id;
     user.location_mainText = req.body.location_mainText;

@@ -1,6 +1,8 @@
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { ERROR_MESSAGE } = require("../contrants");
+const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 
 exports.register = async (req, res, next) => {
   // Our register logic starts here
@@ -10,7 +12,7 @@ exports.register = async (req, res, next) => {
 
     // Validate user input
     if (!(email && password && first_name)) {
-      res.status(400).send("All input is required");
+      return sendError(res, "All input is required")
     }
 
     // check if user already exist
@@ -18,7 +20,7 @@ exports.register = async (req, res, next) => {
     const oldUser = await User.findOne({ email });
 
     if (oldUser) {
-      return res.status(409).send("User Already Exist. Please Login");
+      return sendError(res, "User Already Exist. Please Login")
     }
 
     //Encrypt user password
@@ -33,15 +35,13 @@ exports.register = async (req, res, next) => {
       // Add default avatar
       avatarUrl:
         "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
-      phoneNumber,
     });
 
-    // return new user
-    res.status(201).json(user);
+    sendSuccess(res,"register successfully", user);
   } catch (err) {
     console.log(err);
+    sendServerError(res);
   }
-  // Our register logic ends here
 };
 
 exports.login = async (req, res, next) => {
@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
 
     // Validate user input
     if (!(email && password)) {
-      res.status(400).send("All input is required");
+      return sendError(res, "All input is required")
     }
     // Validate if user exist in our database
     const user = await User.findOne({ email });
@@ -76,20 +76,17 @@ exports.login = async (req, res, next) => {
         }
       );
 
-      // user
-      res.status(200).json({
+      return sendSuccess(res, "login successfully", {
         accsess_token: access_token,
         refresh_token: refresh_token,
-        user_id: user.id,
-        user_name: user.first_name,
-        user_email: user.email,
-        user_avatar: user.avatarUrl,
-      });
+      })
+
     } else {
-      res.status(400).send("Invalid Credentials");
+      return sendError(res, "email or password not correct")
     }
   } catch (err) {
     console.log(err);
+    return sendServerError(res);
   }
   // Our register logic ends here
 };
@@ -100,10 +97,10 @@ exports.loginWithGoogle = async (req, res, next) => {
     const { email, name, avatar } = req.body;
 
     // Validate if user exist in our database
-    var user = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
     if (!user) {
-      var encryptedPassword = await bcrypt.hash(
+      let encryptedPassword = await bcrypt.hash(
         "togerther_we_go_default_password",
         10
       );
@@ -143,8 +140,10 @@ exports.loginWithGoogle = async (req, res, next) => {
       user_email: user.email,
       user_avatar: user.avatarUrl,
     });
+    
   } catch (err) {
     console.log(err);
+    return sendServerError(err);
   }
 };
 
@@ -158,42 +157,52 @@ exports.refresh = async (req, res, next) => {
         .send("A refresh token is required for refresh access token");
     }
     try {
-      const decoded = jwt.verify(token, config.REFRESH_TOKEN_KEY);
+      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_KEY);
       req.user = decoded;
-
+      
       const access_token = jwt.sign(
-        { user_id: user._id, email },
+        { user_id: req.user.user_id,  email : req.user.email },
         process.env.ACCESS_TOKEN_KEY,
         {
           expiresIn: "2h",
         }
       );
 
-      res.status(200).json({
+      return sendSuccess(res, "Refresh access token successfully", {
         accsess_token: access_token,
       });
+
     } catch (err) {
-      return res.status(401).send("Invalid Refresh Token");
+      return sendError(res,"Invalid Refresh Token" )
     }
   } catch (err) {
     console.log(err);
+    return sendServerError(res);
   }
 };
 
 exports.resetPassword = async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, new_password } = req.body;
 
     // Validate if user exist in our database
-    var user = await User.findOne({ email });
+    let user = await User.findOne({ email });
 
-    var encryptedPassword = await bcrypt.hash(password, 10);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      let encryptedPassword = await bcrypt.hash(new_password, 10);
 
-    user.password = encryptedPassword;
-    await user.save();
-    res.status(200).json({});
+      user.password = encryptedPassword;
+      await user.save();
+   
+      return sendSuccess(res, "Reset password successfully");
+      
+    }
+    else {
+      return sendError(res, "email or password not correct")
+    }
+
   } catch (err) {
     console.log(err);
-    return res.status(401).send("Reset Failded");
+    return sendServerError(res);
   }
 };
