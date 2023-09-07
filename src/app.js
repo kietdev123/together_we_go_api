@@ -18,12 +18,26 @@ const userRoutes = require("./routes/user.js");
 const bookingRoutes = require("./routes/booking.js");
 const applyRoutes = require("./routes/apply.js");
 const reviewRoutes = require("./routes/review.js");
-
+const morgan =  require("morgan");
+const useragent =  require('express-useragent');
+const requestIp =  require('request-ip')
+const Log = require('./middleware/log.js');
 const app = express();
+
+// log api
+app.use(morgan("dev"))
+// log client infomation
+app.use(useragent.express());
+// log ip
+app.use(requestIp.mw())
+app.use(Log);
 
 // import swagger
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./config/swagger/index.js');
+const fs = require("fs")
+const YAML = require('yaml')
+const file  = fs.readFileSync('./src/swagger.yaml', 'utf8')
+const swaggerDocument = YAML.parse(file)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(bodyParser.json());
