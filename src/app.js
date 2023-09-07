@@ -22,6 +22,7 @@ const morgan =  require("morgan");
 const useragent =  require('express-useragent');
 const requestIp =  require('request-ip')
 const Log = require('./middleware/log.js');
+const verifyToken = require('./middleware/auth.js');
 const app = express();
 
 // log api
@@ -53,7 +54,7 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/chat_room", chatRoomRoutes);
 app.use("/api/message", messageRoutes);
 app.use("/api/user", userRoutes);
-app.use("/api/booking", bookingRoutes);
+app.use("/api/booking", verifyToken, bookingRoutes);
 app.use("/api/apply", applyRoutes);
 app.use("/api/review", reviewRoutes);
 module.exports = app;

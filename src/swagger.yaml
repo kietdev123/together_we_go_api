@@ -194,6 +194,93 @@ paths:
           description: Validation exception
         '500':
           description: Server internal error
+  /booking/createBooking/{userId}:
+    post:
+      tags:
+        - booking
+      parameters:
+        - name: userId
+          in: path
+          description: objectId of user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'      
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /booking/getAllListBooking:
+    get:
+      tags:
+        - booking
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'      
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /booking/getMyBooking/{userId}:
+    get:
+      tags:
+        - booking
+      parameters:
+        - name: userId
+          in: path
+          description: objectId of user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Booking'      
+        '400':
+          description: Invalid ID supplied
+        '404':
+          description: Pet not found
+        '405':
+          description: Validation exception
+        '500':
+          description: Server internal error
+      security:
+        - api_key: [] 
 components:
   schemas:
     Apply:
