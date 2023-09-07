@@ -4,15 +4,15 @@ const {
   _chatRoom_updateNumUnWatch,
   _chatRoom_resetNumUnWatch,
 } = require("../function/chat_room.function.js");
-var numClients = {};
+let numClients = {};
 
 exports.chat_feature_init = (client, current_user_id, io) => {
   client.on("join_chat_room", (data) => {
     console.log("join chat room");
-    var chat_room_id = data["chat_room_id"];
+    let chat_room_id = data["chat_room_id"];
     client.join("chat_room" + chat_room_id);
 
-    var chatID = "chat_room" + chat_room_id;
+    let chatID = "chat_room" + chat_room_id;
     if (numClients[chatID] == undefined) {
       numClients[chatID] = 1;
     } else {
@@ -24,21 +24,21 @@ exports.chat_feature_init = (client, current_user_id, io) => {
 
   client.on("leave_chat_room", (data) => {
     console.log("leave chat room");
-    var chat_room_id = data["chat_room_id"];
+    let chat_room_id = data["chat_room_id"];
     client.leave("chat_room" + chat_room_id);
 
-    var chatID = "chat_room" + chat_room_id;
+    let chatID = "chat_room" + chat_room_id;
     if (numClients[chatID] != undefined && numClients[chatID] > 0) {
       numClients[chatID]--;
     }
   });
 
   client.on("send_message_to_chat_room", async (data) => {
-    var chat_room_id = data["chat_room_id"];
-    var partner_id = data["partner_id"];
+    let chat_room_id = data["chat_room_id"];
+    let partner_id = data["partner_id"];
 
     console.log(data);
-    var message = {
+    let message = {
       chatRoomId: data["chat_room_id"],
       userId: data["userId"],
       message: data["message"],
@@ -48,8 +48,8 @@ exports.chat_feature_init = (client, current_user_id, io) => {
 
     saveMessage(message);
 
-    var chatID = "chat_room" + chat_room_id;
-    var usersInRoom = numClients[chatID];
+    let chatID = "chat_room" + chat_room_id;
+    let usersInRoom = numClients[chatID];
 
     console.log("message num ", usersInRoom || 0);
     if (usersInRoom == undefined) {

@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { APPLY_STATE } = require("../contrants.js");
 
 const applySchema = new mongoose.Schema(
   {
@@ -6,7 +7,7 @@ const applySchema = new mongoose.Schema(
     deal_price: { type: Number },
     booking: { type: mongoose.Schema.Types.ObjectId, ref: "booking" },
     note: { type: String },
-    state: { type: String }, // waiting / accepted->starting->close / refuse
+    state: { type: String, enum : APPLY_STATE }, // waiting / accepted->starting->close / refuse
   },
   { timestamps: true }
 );

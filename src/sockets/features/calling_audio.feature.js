@@ -16,14 +16,14 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
   client.on("calling", async (data) => {
     try {
       console.log(data);
-      var partner_id = data["partner_id"];
-      var call_type = data["call_type"];
+      let partner_id = data["partner_id"];
+      let call_type = data["call_type"];
       console.log("partner_id :", partner_id);
 
-      var partner_socket_id = await getSocketId(partner_id);
+      let partner_socket_id = await getSocketId(partner_id);
 
-      var current_user = await getUser(current_user_id);
-      var partner = await getUser(partner_id);
+      let current_user = await getUser(current_user_id);
+      let partner = await getUser(partner_id);
 
       console.log(await getIsCalling(current_user_id));
       console.log(await getIsCalling(partner_id));
@@ -70,8 +70,8 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
 
   client.on("acctepted_calling", async (data) => {
     console.log("acctepted_calling");
-    var partner_id = data["partner_id"];
-    var partner_socket_id = await getSocketId(partner_id);
+    let partner_id = data["partner_id"];
+    let partner_socket_id = await getSocketId(partner_id);
     if (
       !((await getClientPeerId(current_user_id)) == undefined) &&
       !((await getClientPeerId(partner_id)) == undefined)
@@ -87,13 +87,13 @@ exports.calling_audio_feature_init = async (client, current_user_id) => {
 
   client.on("init_peer_id", (data) => {
     console.log("init_peer_id");
-    var peer_id = data.peer_id;
+    let peer_id = data.peer_id;
     updateClientPeerId(current_user_id, peer_id);
   });
 
   client.on("stop_calling", async (data) => {
-    var partner_id = data["partner_id"];
-    var partner_socket_id = await getSocketId(partner_id);
+    let partner_id = data["partner_id"];
+    let partner_socket_id = await getSocketId(partner_id);
     console.log("stop");
     updateIsCalling(current_user_id, false);
 

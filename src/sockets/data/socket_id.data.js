@@ -1,4 +1,4 @@
-var socketIds = {};
+let socketIds = {};
 
 const getSocketId = async (uid = "") => {
   return socketIds[uid];

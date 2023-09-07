@@ -1,4 +1,4 @@
-var is_Callings = {};
+let is_Callings = {};
 
 const getIsCalling = async (uid = "") => {
   return is_Callings[uid];

@@ -7,7 +7,7 @@ const send_gmail = async () => {
   try {
     console.log('send gmail');
     //const { userEmail } = req.body;
-    var userEmail = "skill1sp2@gmail.com"
+    let userEmail = "skill1sp2@gmail.com"
 
     let config = {
       service: 'gmail',

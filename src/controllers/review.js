@@ -30,9 +30,9 @@ exports.createReview = (req, res, next) => {
 
 exports.getReviewWithUserId = async (req, res, next) => {
   try {
-    var userId = req.params.userId;
+    let userId = req.params.userId;
 
-    var reviews = await Review.find({
+    let reviews = await Review.find({
       receiver: userId,
     })
       .populate("creater")

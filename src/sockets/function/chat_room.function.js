@@ -1,7 +1,7 @@
 const ChatRoom = require("../../models/chat_room");
 
 const _chatRoom_updateNumUnWatch = async (chatRoomId, partner_id) => {
-  var chatRoom = await ChatRoom.findById(chatRoomId);
+  let chatRoom = await ChatRoom.findById(chatRoomId);
   if (chatRoom.userId_1 == partner_id) {
     chatRoom.num_unwatched_1++;
   } else {
@@ -11,7 +11,7 @@ const _chatRoom_updateNumUnWatch = async (chatRoomId, partner_id) => {
 };
 
 const _chatRoom_resetNumUnWatch = async (chatRoomId, current_user_id) => {
-  var chatRoom = await ChatRoom.findById(chatRoomId);
+  let chatRoom = await ChatRoom.findById(chatRoomId);
   if (chatRoom.userId_1 == current_user_id) {
     chatRoom.num_unwatched_1 = 0;
   } else {
