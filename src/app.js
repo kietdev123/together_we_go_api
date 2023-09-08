@@ -51,10 +51,10 @@ app.get("/", (req, res) => {
 app.use("/api/todos", todoRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/chat_room", chatRoomRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/chat_room", verifyToken, chatRoomRoutes);
+app.use("/api/message", verifyToken, messageRoutes);
+app.use("/api/user", verifyToken, userRoutes);
 app.use("/api/booking", verifyToken, bookingRoutes);
-app.use("/api/apply", applyRoutes);
-app.use("/api/review", reviewRoutes);
+app.use("/api/apply", verifyToken, applyRoutes);
+app.use("/api/review", verifyToken, reviewRoutes);
 module.exports = app;

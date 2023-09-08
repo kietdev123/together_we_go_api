@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 
 exports.editAvatar = async (req, res, next) => {
   try {

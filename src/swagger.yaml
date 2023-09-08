@@ -46,10 +46,6 @@ paths:
                 $ref: '#/components/schemas/User'          
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
   /auth/login:
@@ -82,10 +78,6 @@ paths:
                     type: string          
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
   /auth/loginWithGoogle:
@@ -120,10 +112,6 @@ paths:
                     type: string          
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
   /auth/resetPassword:
@@ -156,10 +144,6 @@ paths:
                     type: string      
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
   /auth/refresh:
@@ -188,10 +172,6 @@ paths:
                     type: string      
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
   /booking:
@@ -221,13 +201,9 @@ paths:
                     example: string
                   data:
                     type: object
-                    $ref: '#/components/schemas/Booking_post'             
+                    $ref: '#/components/schemas/Booking_get'             
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
       security:
@@ -297,10 +273,6 @@ paths:
                       $ref: '#/components/schemas/Booking_get'      
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
       security:
@@ -336,23 +308,193 @@ paths:
                     $ref: '#/components/schemas/Booking_get'      
         '400':
           description: Invalid ID supplied
-        '404':
-          description: Pet not found
-        '405':
-          description: Validation exception
         '500':
           description: Server internal error
       security:
         - api_key: [] 
+  /apply:
+    post:
+      summary: create apply
+      tags:
+        - apply
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Apply_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Apply_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    get:
+      summary: get applys
+      tags:
+        - apply
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          schema:
+            type: integer
+            description: -1 means lasted first
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          schema:
+            type: integer
+            description: -1 means lasted first
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: applyer_id
+          schema:
+            type: string
+            description: objectId of user 
+        - in: query
+          name: booking_id
+          schema:
+            type: string
+            description: objectId of booking                 
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Apply_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /apply/{id}:
+    get:
+      summary: get 1 apply
+      tags:
+        - apply
+      parameters:
+        - name: id
+          in: path
+          description: objectId of apply
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Apply_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    patch:
+      summary: update 1 apply
+      tags:
+        - apply
+      parameters:
+        - name: id
+          in: path
+          description: objectId of apply
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Apply_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
 components:
   schemas:
-    Apply:
+    Apply_post:
       type: object
       properties:
-        _id:
-          type: string
-          description: objectId
-          example: "string"
         deal_price:
           type: integer
           format: int64
@@ -361,6 +503,31 @@ components:
           type: string
           description: objectId
           example: "string"
+        state:
+          type: string
+          default: 'waiting'
+          enum:
+            - 'waiting'
+            - 'accepted'
+            - 'starting'
+            - 'refuse'
+      xml:
+        name: apply
+    Apply_get:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: objectId
+          example: "string"
+        applyer:
+          $ref: '#/components/schemas/User'
+        booking:
+          $ref: '#/components/schemas/Booking_get'
+        deal_price:
+          type: integer
+          format: int64
+          example: 198772     
         state:
           type: string
           default: 'waiting'
@@ -380,10 +547,6 @@ components:
     Booking_post:
       type: object
       properties:
-        _id:
-          type: string
-          description: objectId
-          example: "string"
         authorId:
           type: string
           description: objectId
