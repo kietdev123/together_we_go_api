@@ -3,6 +3,7 @@ const ChatRoom = require("../models/chat_room");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const message_name = "message";
 const mongoose = require("mongoose");
+const chatFeature = require("../sockets/features/chat.feature.js");
 
 exports.create = async (req, res, next) => {
   try {
@@ -14,6 +15,9 @@ exports.create = async (req, res, next) => {
     });
 
     await data.save();
+
+    chatFeature.sendMessage(data);
+
     return sendSuccess(res, `${message_name} added succesfully`, data);
 
   } catch (error) {

@@ -20,7 +20,7 @@ exports.calling_feature_init = async (client) => {
 
       await receiver.save();
 
-      const receiver_socket_id = await SocketIdData.get(receiver_id);
+      const receiver_socket_id = await UserData.get(receiver_id).socket_id;
       client.to(receiver_socket_id).emit("stop_call");
     } catch (error) {}
   });
