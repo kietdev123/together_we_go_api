@@ -5,8 +5,8 @@ const reviewSchema = new mongoose.Schema(
     creater: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     receiver: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     apply: { type: mongoose.Schema.Types.ObjectId, ref: "apply" },
-    review_note: { type: String, default: "" },
-    review_star: { type: Number, default: 0 },
+    note: { type: String, default: "" },
+    star: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
