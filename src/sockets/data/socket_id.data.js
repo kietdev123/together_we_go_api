@@ -1,12 +1,15 @@
 let socketIds = {};
+// {
+//     'socket_id' : 'userId'
+// }
 
-const getSocketId = async (uid = "") => {
-  return socketIds[uid];
+exports.get = async (socket_id = "") => {
+  return socketIds[socket_id];
 };
 
-const updateSocketId = async (uid = "", socket_id) => {
+exports.update = async (socket_id, uid) => {
   try {
-    socketIds[uid] = socket_id;
+    socketIds[socket] = uid;
     console.log(socketIds);
   } catch (error) {
     console.log("updateSocketId error");
@@ -14,17 +17,3 @@ const updateSocketId = async (uid = "", socket_id) => {
   }
 };
 
-const count_num_clients_online = async () => {
-  try {
-    return Object.keys(socketIds).length;
-  } catch (error) {
-    console.log("count_num_clients_online error");
-    console.log(error);
-  }
-};
-
-module.exports = {
-  count_num_clients_online,
-  getSocketId,
-  updateSocketId,
-};

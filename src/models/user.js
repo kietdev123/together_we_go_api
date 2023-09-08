@@ -27,6 +27,10 @@ const userSchema = new mongoose.Schema({
   location_mainText: { type: String, default: "" },
   location_address: { type: String, default: "" },
   role: { type: String, default: USER_ROLE.USER, enum : USER_ROLE },
+  isCalling: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);
