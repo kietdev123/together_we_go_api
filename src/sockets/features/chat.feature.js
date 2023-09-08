@@ -1,68 +1,55 @@
-const { saveMessage } = require("../function/socket.function.js");
-const { getSocketId } = require("../data/socket_id.data.js");
-const {
-  _chatRoom_updateNumUnWatch,
-  _chatRoom_resetNumUnWatch,
-} = require("../function/chat_room.function.js");
-let numClients = {};
+const {io} = require('../../index.js');
+const chat_room = require('../../models/chat_room');
+const UserData = require('../data/user.js');
 
-exports.chat_feature_init = (client, current_user_id, io) => {
+exports.chat_feature_init = (client) => {
   client.on("join_chat_room", (data) => {
-    console.log("join chat room");
-    let chat_room_id = data["chat_room_id"];
-    client.join("chat_room" + chat_room_id);
-
-    let chatID = "chat_room" + chat_room_id;
-    if (numClients[chatID] == undefined) {
-      numClients[chatID] = 1;
-    } else {
-      numClients[chatID]++;
+    try {
+      console.log("join chat room");
+      let chat_room_id = data["chat_room_id"];
+      client.join(chat_room_id);
+    } catch (error) {
+      console.log(error);
     }
-
-    _chatRoom_resetNumUnWatch(chat_room_id, current_user_id);
   });
 
   client.on("leave_chat_room", (data) => {
-    console.log("leave chat room");
-    let chat_room_id = data["chat_room_id"];
-    client.leave("chat_room" + chat_room_id);
-
-    let chatID = "chat_room" + chat_room_id;
-    if (numClients[chatID] != undefined && numClients[chatID] > 0) {
-      numClients[chatID]--;
-    }
-  });
-
-  client.on("send_message_to_chat_room", async (data) => {
-    let chat_room_id = data["chat_room_id"];
-    let partner_id = data["partner_id"];
-
-    console.log(data);
-    let message = {
-      chatRoomId: data["chat_room_id"],
-      userId: data["userId"],
-      message: data["message"],
-      type: data["type"],
-      createdAt: data["createdAt"],
-    };
-
-    saveMessage(message);
-
-    let chatID = "chat_room" + chat_room_id;
-    let usersInRoom = numClients[chatID];
-
-    console.log("message num ", usersInRoom || 0);
-    if (usersInRoom == undefined) {
-      usersInRoom = 0;
-    }
-
-    if (usersInRoom == 1) {
-      await _chatRoom_updateNumUnWatch(chat_room_id, partner_id);
-      client.in(await getSocketId(partner_id)).emit("reload_chatRooms");
-    } else {
-      client
-        .in("chat_room" + chat_room_id)
-        .emit("receive_message_from_chat_room", message);
+    try {
+      console.log("leave chat room");
+      let chat_room_id = data["chat_room_id"];
+      client.leave(chat_room_id);
+    } catch (error) {
+      console.log(error);
     }
   });
 };
+
+exports.sendMessage = async (message) => { 
+  try {
+    let sockets = await io.in(message["chatRoomId"]).fetchSockets();
+    let usersInRoom = sockets.length;
+
+    if (usersInRoom == 1) {   
+      const chatRoom = await chat_room.findById(message["chatRoomId"]).lean();
+      let receiver_id;
+      if (chatRoom.userId_1 == message.userId) receiver_id = chatRoom.userId_2;
+      else receiver_id = chatRoom.userId_1;
+      const receiver_socket_id = await UserData.get(receiver_id).socket_id;
+      const _name = await UserData.get(message.userId).name;
+      
+      io.to(receiver_socket_id).emit(
+        "receive_notification", 
+        {
+          notification_body: _name + " đã gửi bạn 1 tin nhắn",
+          notification_name_screen: "chat_screen",
+        }
+      );
+    }
+    io.in(message["chatRoomId"]).emit(
+      "receive_message",
+      message
+    ); 
+  } catch (error) {
+    console.log(error);
+  }
+}

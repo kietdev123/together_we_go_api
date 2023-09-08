@@ -24,3 +24,8 @@ module.exports.ERROR_MESSAGE = {
     OJECTID_NOT_VALID : 'object_id_not_valid',
     SERVER_INTERNAL_ERROR : 'server internal error',
 };
+
+module.exports.CALL_TYPE = {
+    VIDEO : 'video',
+    AUDIO : 'audio',
+  };

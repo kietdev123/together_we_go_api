@@ -60,7 +60,7 @@ exports.login = async (req, res, next) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       // Create token
       const access_token = jwt.sign(
-        { user_id: user._id, email },
+        { user_id: user._id, role : user.role },
         process.env.ACCESS_TOKEN_KEY,
         {
           expiresIn: "2h",
@@ -69,7 +69,7 @@ exports.login = async (req, res, next) => {
 
       // Create token
       const refresh_token = jwt.sign(
-        { user_id: user._id, email },
+        { user_id: user._id, role : user.role },
         process.env.REFRESH_TOKEN_KEY,
         {
           expiresIn: "30d",
@@ -115,7 +115,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const access_token = jwt.sign(
-      { user_id: user._id, email },
+      { user_id: user._id, role : user.role },
       process.env.ACCESS_TOKEN_KEY,
       {
         expiresIn: "2h",
@@ -124,7 +124,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const refresh_token = jwt.sign(
-      { user_id: user._id, email },
+      { user_id: user._id, role : user.role },
       process.env.REFRESH_TOKEN_KEY,
       {
         expiresIn: "30d",
@@ -161,7 +161,7 @@ exports.refresh = async (req, res, next) => {
       req.user = decoded;
       
       const access_token = jwt.sign(
-        { user_id: req.user.user_id,  email : req.user.email },
+        { user_id: req.user.user_id,  role : req.user.role },
         process.env.ACCESS_TOKEN_KEY,
         {
           expiresIn: "2h",

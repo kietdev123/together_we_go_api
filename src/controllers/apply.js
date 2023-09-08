@@ -1,140 +1,119 @@
 const mongoose = require("mongoose");
-
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
+const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
+const message_name = "booking";
 
-exports.createApply = async (req, res, next) => {
-  const booking = await Booking.findById(req.body.booking_id);
+exports.create = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.body.booking);
 
-  if (booking.authorId == req.body.applyer_Id){
-    res.status(400).json({
-      message: "Không thể tham gia vào chuyến đi của bạn, vui lòng chọn chuyến khác!",
+    if (booking.authorId == req.body.applyer_Id){
+      return sendError(res, "Không thể tham gia vào chuyến đi của bạn, vui lòng chọn chuyến khác!");
+    }
+    
+    const oldApply = await Apply.findOne({
+      applyer: new mongoose.Types.ObjectId(req.user.user_id),
+      booking: new mongoose.Types.ObjectId(req.body.booking),
+      state: "waiting",
     });
-    return;
+
+    if (oldApply != null && oldApply != undefined) {
+      return sendError(res, "Bạn đã apply vào chuyến đi này rồi !");
+    }
+
+    let data = new Apply({
+      applyer: new mongoose.Types.ObjectId(req.user.user_id),
+      note: req.body.note,
+      deal_price: Number(req.body.deal_price),
+      booking: new mongoose.Types.ObjectId(req.body.booking),
+      state: "waiting",
+    });
+
+    await data.save();
+    return sendSuccess(res, "Apply added succesfully", data);
+
+  } catch (error) {
+    console.log(error);
+    return sendServerError(res);
   }
-  
-  const oldApply = await Apply.findOne({
-    applyer: new mongoose.Types.ObjectId(req.body.applyer_Id),
-    booking: new mongoose.Types.ObjectId(req.body.booking_id),
-    state: "waiting",
-  });
-
-  if (oldApply != null && oldApply != undefined) {
-    res.status(400).json({
-      message: "Bạn đã apply vào chuyến đi này rồi !",
-    });
-    return;
-  }
-
-  const apply = new Apply({
-    applyer: new mongoose.Types.ObjectId(req.body.applyer_Id),
-    note: req.body.note,
-    deal_price: req.body.deal_price,
-    booking: new mongoose.Types.ObjectId(req.body.booking_id),
-    state: "waiting",
-  });
-  apply
-    .save()
-    .then((result) => {
-      res.status(200).json({
-        message: "Apply added succesfully",
-        post: {
-          ...result,
-          id: result._id,
-        },
-      });
-    })
-    .catch((err) => {
-      res.status(500).json({
-        message: "Fail to create apply!",
-      });
-    });
 };
 
-exports.updateApply = async (req, res, next) => {
+exports.update = async (req, res, next) => {
   try {
-    let applyId = req.params.id;
+    let id = req.params.id;
 
-    const apply = await Apply.findByIdAndUpdate(applyId, req.body)
+    const data = await Apply.findByIdAndUpdate(id, req.body)
     .populate("booking");
 
     if (req.body.state == "close") {
       await Booking.findByIdAndUpdate(apply.booking._id, {status : 'complete'});
     }
-    
-    res.status(200).json({
-      title: "pass",
-    });
+
+    return sendSuccess(res, `Update 1 ${message_name} successfully`, data);
   } catch (err) {
-    res.status(500).json({
-      title: "error",
-      message: err.message,
-    });
+    console.log(err);
+    return sendServerError(res);
   }
 };
 
-exports.getMyApply = async (req, res, next) => {
+exports.getList = async (req, res, next) => {
   try {
-    let applyerId = req.params.userId;
+    let filter = {};
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt, applyer_id, booking_id} = req.query;
+    let skipNum = 0;
 
-    let applys = await Apply.find({ applyer: applyerId })
-      .populate("applyer")
-      .populate({
-        path: "booking",
-        populate: {
-          path: "authorId",
-        },
-      })
-      .sort({'createdAt':-1});
-  
+    if (page) page = Number(page);
+    else page = 1
 
-    res.status(200).json(applys);
-  } catch (err) {
-    res.status(500).json({
-      title: "error",
-      message: err.message,
-    });
-  }
-};
+    if (pageSize) pageSize = Number(pageSize);
+    else pageSize = 20;
 
-exports.getApplyBooking = async (req, res, next) => {
-  try {
-    let bookingId = req.params.bookingId;
+    skipNum = (page - 1) * pageSize;
+    if (skipNum < 0) skipNum = 0;
 
-    let applys = await Apply.find({ booking: bookingId })
-      .populate("applyer")
-      .populate({
-        path: "booking",
-        populate: {
-          path: "authorId",
-        },
-      })
-      .sort({'createdAt':-1});
+    if (applyer_id) filter.applyer = new mongoose.Types.ObjectId(applyer_id);
+    if (booking_id) filter.booking = new mongoose.Types.ObjectId(booking_id);
 
-    res.status(200).json(applys);
-  } catch (err) {
-    res.status(500).json({
-      title: "error",
-      message: err.message,
-    });
-  }
-};
-exports.getBookingInApply = async (req, res, next) => {
-  try {
-    let applyId = req.params.applyId;
+    let _sort = {};
+    if (sortCreatedAt) _sort.createdAt = Number(sortCreatedAt);
+    if (sortUpdatedAt) _sort.updatedAt = Number(sortUpdatedAt);
 
-    let apply = await Apply.findById(applyId).populate({
+    const datas = await Apply
+    .find(filter)
+    .sort(_sort)
+    .skip(skipNum)
+    .limit(pageSize)
+    .populate("applyer")
+    .populate({
       path: "booking",
       populate: {
         path: "authorId",
       },
     });
+    
+    return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
 
-    res.status(200).json(apply);
-  } catch (err) {
-    res.status(500).json({
-      title: "error",
-      message: err.message,
+  } catch (e) {
+    console.log(e);
+    return sendServerError(res);
+  }
+};
+
+exports.getOne = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const data = await Apply.findById(id)
+    .populate("applyer")
+    .populate({
+      path: "booking",
+      populate: {
+        path: "authorId",
+      },
     });
+    return sendSuccess(res, `Get 1 ${message_name} successfully`, data);
+  } catch (e) {
+    console.log(e);
+    return sendServerError(res);
   }
 };

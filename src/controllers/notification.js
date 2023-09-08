@@ -1,25 +1,23 @@
 const mongoose = require("mongoose");
-const Review = require("../models/review");
+const Notification = require("../models/notification.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const message_name = "review";
+const message_name = "notification";
 
 exports.create = async (req, res, next) => {
-  try {
-    let data = new Review({
-      creater: new mongoose.Types.ObjectId(req.user.user_id),
-      receiver: new mongoose.Types.ObjectId(req.body.receiver_id),
-      apply: new mongoose.Types.ObjectId(req.body.apply_id),
-      review_note: req.body.note,
-      review_star: req.body.star,
-    });
-
-    await data.save();
-    return sendSuccess(res, `${message_name} added succesfully`, data);
-
-  } catch (error) {
-    console.log(error);
-    return sendServerError(res);
-  }
+    try {
+      let data = new Notification({
+        receiver: new mongoose.Types.ObjectId(req.user.user_id),
+        author: new mongoose.Types.ObjectId(req.user.user_id),
+        text: req.body.text,
+      });
+  
+      await data.save();
+      return sendSuccess(res, `${message_name} added succesfully`, data);
+  
+    } catch (error) {
+      console.log(error);
+      return sendServerError(res);
+    }
 };
 
 exports.getList = async (req, res, next) => {
@@ -43,14 +41,13 @@ exports.getList = async (req, res, next) => {
     if (sortCreatedAt) _sort.createdAt = Number(sortCreatedAt);
     if (sortUpdatedAt) _sort.updatedAt = Number(sortUpdatedAt);
 
-    const datas = await Review
+    const datas = await Notification
     .find(filter)
     .sort(_sort)
     .skip(skipNum)
     .limit(pageSize)
-    .populate("creater")
     .populate("receiver")
-    .populate("apply");
+    .populate("author");
     
     return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
 

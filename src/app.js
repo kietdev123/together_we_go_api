@@ -18,10 +18,12 @@ const userRoutes = require("./routes/user.js");
 const bookingRoutes = require("./routes/booking.js");
 const applyRoutes = require("./routes/apply.js");
 const reviewRoutes = require("./routes/review.js");
+const notificationRoutes = require("./routes/notification.js");
 const morgan =  require("morgan");
 const useragent =  require('express-useragent');
 const requestIp =  require('request-ip')
 const Log = require('./middleware/log.js');
+const verifyToken = require('./middleware/auth.js');
 const app = express();
 
 // log api
@@ -50,10 +52,12 @@ app.get("/", (req, res) => {
 app.use("/api/todos", todoRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/upload", uploadRoutes);
-app.use("/api/chat_room", chatRoomRoutes);
-app.use("/api/message", messageRoutes);
-app.use("/api/user", userRoutes);
-app.use("/api/booking", bookingRoutes);
-app.use("/api/apply", applyRoutes);
-app.use("/api/review", reviewRoutes);
+app.use("/api/chat_room", verifyToken, chatRoomRoutes);
+app.use("/api/message", verifyToken, messageRoutes);
+app.use("/api/user", verifyToken, userRoutes);
+app.use("/api/booking", verifyToken, bookingRoutes);
+app.use("/api/apply", verifyToken, applyRoutes);
+app.use("/api/review", verifyToken, reviewRoutes);
+app.use("/api/notification", verifyToken, notificationRoutes);
+
 module.exports = app;

@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { USER_GENDER } = require("../contrants.js");
+const { USER_GENDER, USER_ROLE } = require("../contrants.js");
 
 const userSchema = new mongoose.Schema({
   first_name: { type: String, default: null },
@@ -26,6 +26,11 @@ const userSchema = new mongoose.Schema({
   location_id: { type: String, default: "" },
   location_mainText: { type: String, default: "" },
   location_address: { type: String, default: "" },
+  role: { type: String, default: USER_ROLE.USER, enum : USER_ROLE },
+  isCalling: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 module.exports = mongoose.model("user", userSchema);
