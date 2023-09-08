@@ -490,6 +490,145 @@ paths:
           description: Server internal error
       security:
         - api_key: []
+  /chat_room:
+    post:
+      summary: create chat room
+      tags:
+        - chat_room
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Chat_room_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Chat_room_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    get:
+      summary: get chat_rooms
+      tags:
+        - chat_room
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          schema:
+            type: integer
+            description: -1 means lasted first
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          schema:
+            type: integer
+            description: -1 means lasted first
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: user1_id
+          schema:
+            type: string
+            description: objectId of user 
+        - in: query
+          name: user2_id
+          schema:
+            type: string
+            description: objectId of user                
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Chat_room_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /chat_room/{id}:
+    get:
+      summary: get 1 chat room
+      tags:
+        - chat_room
+      parameters:
+        - name: id
+          in: path
+          description: objectId of chat room
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Chat_room_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
 components:
   schemas:
     Apply_post:
@@ -674,7 +813,20 @@ components:
           example: "string"
       xml:
         name: booking
-    Chat_room:
+    Chat_room_post:
+      type: object
+      properties:
+        userId_1:
+          type: string
+          description: objectId
+          example: "string"
+        userId_2:
+          type: string
+          description: objectId
+          example: "string"
+      xml:
+        name: chat_room
+    Chat_room_get:
       type: object
       properties:
         _id:
@@ -686,29 +838,23 @@ components:
           description: objectId
           example: "string"
         user1:
-          type: string
-          description: objectId
-          example: "string"
+          $ref: '#/components/schemas/User'
         userId_2:
           type: string
           description: objectId
           example: "string"
         user2:
-          type: string
-          description: objectId
-          example: "string"
+          $ref: '#/components/schemas/User'
         num_unwatched_1:
           type: integer
           format: int64
-          example: 198772
+          example: 1
         num_unwatched_2:
           type: integer
           format: int64
-          example: 198772
+          example: 1
         lastMessage:
-          type: string
-          description: objectId
-          example: "string"
+          $ref: '#/components/schemas/Message_get'
         createdAt:
           type: string
           example: "string"
@@ -717,7 +863,35 @@ components:
           example: "string"
       xml:
         name: chat_room
-    Message:
+    Message_post:
+      type: object
+      properties:
+        chatRoomId:
+          type: string
+          description: objectId
+          example: "string"
+        userId:
+          type: string
+          description: objectId
+          example: "string"
+        message:
+          type: string
+          example: "string"
+        type:
+          type: string
+          default: 'text'
+          enum:
+            - 'text'
+            - 'image'
+        createdAt:
+          type: string
+          example: "string"
+        updatedAt:
+          type: string
+          example: "string"
+      xml:
+        name: message
+    Message_get:
       type: object
       properties:
         _id:
@@ -749,7 +923,37 @@ components:
           example: "string"
       xml:
         name: message
-    Review:
+    Review_post:
+      type: object
+      properties:
+        creater:
+          type: string
+          description: objectId
+          example: "string"
+        receiver:
+          type: string
+          description: objectId
+          example: "string"
+        apply:
+          type: string
+          description: objectId
+          example: "string"
+        review_star:
+          type: integer
+          format: int64
+          example: 198772
+        review_note:
+          type: string
+          example: "string"
+        createdAt:
+          type: string
+          example: "string"
+        updatedAt:
+          type: string
+          example: "string"
+      xml:
+        name: review
+    Review_get:
       type: object
       properties:
         _id:
