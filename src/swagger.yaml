@@ -1315,6 +1315,13 @@ components:
           enum:
             - 'male'
             - 'female'
+        role:
+          type: string
+          example: "user"
+          default: 'user'
+          enum:
+            - 'user'
+            - 'admin'
         location_id:
           type: string
           example: "string"
