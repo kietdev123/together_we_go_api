@@ -227,17 +227,17 @@ paths:
             default: 20
         - in: query
           name: sortCreatedAt
+          description: -1 means lasted first
           schema:
-            type: integer
-            description: -1 means lasted first
+            type: integer         
             enum:
               - 1
               - -1
         - in: query
           name: sortUpdatedAt
+          description: -1 means lasted first
           schema:
             type: integer
-            description: -1 means lasted first
             enum:
               - 1
               - -1
@@ -365,17 +365,17 @@ paths:
             default: 20
         - in: query
           name: sortCreatedAt
+          description: -1 means lasted first
           schema:
-            type: integer
-            description: -1 means lasted first
+            type: integer         
             enum:
               - 1
               - -1
         - in: query
           name: sortUpdatedAt
+          description: -1 means lasted first
           schema:
-            type: integer
-            description: -1 means lasted first
+            type: integer     
             enum:
               - 1
               - -1
@@ -543,17 +543,17 @@ paths:
             default: 20
         - in: query
           name: sortCreatedAt
+          description: -1 means lasted first
           schema:
-            type: integer
-            description: -1 means lasted first
+            type: integer         
             enum:
               - 1
               - -1
         - in: query
           name: sortUpdatedAt
+          description: -1 means lasted first
           schema:
             type: integer
-            description: -1 means lasted first
             enum:
               - 1
               - -1
@@ -623,6 +623,148 @@ paths:
                   data:
                     type: object
                     $ref: '#/components/schemas/Chat_room_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /message:
+    post:
+      summary: create message
+      tags:
+        - message
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Message_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Message_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    get:
+      summary: get messages
+      tags:
+        - message
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer         
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: chat_room_id
+          schema:
+            type: string
+            description: objectId of chat room              
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /message/{id}:
+    patch:
+      summary: update 1 message
+      tags:
+        - message
+      parameters:
+        - name: id
+          in: path
+          description: objectId of message
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                message:          
+                  type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Message_get'      
         '400':
           description: Invalid ID supplied
         '500':
@@ -870,10 +1012,6 @@ components:
           type: string
           description: objectId
           example: "string"
-        userId:
-          type: string
-          description: objectId
-          example: "string"
         message:
           type: string
           example: "string"
@@ -883,12 +1021,6 @@ components:
           enum:
             - 'text'
             - 'image'
-        createdAt:
-          type: string
-          example: "string"
-        updatedAt:
-          type: string
-          example: "string"
       xml:
         name: message
     Message_get:
