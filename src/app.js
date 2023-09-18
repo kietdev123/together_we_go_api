@@ -42,8 +42,10 @@ const file  = fs.readFileSync('./src/swagger.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
+const cors = require("cors");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 app.get("/", (req, res) => {
   res.send("hello world");
