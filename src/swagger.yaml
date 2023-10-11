@@ -871,7 +871,7 @@ paths:
           description: Server internal error
       security:
         - api_key: []
-  /user:
+  /user/profile:
     get:
       summary: get current user
       tags:
@@ -940,6 +940,163 @@ paths:
                   data:
                     type: object
                     $ref: '#/components/schemas/Apply_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /user:
+    get:
+      summary: get applys
+      tags:
+        - user
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: keyword
+          schema:
+            type: string                
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /user/{id}:
+    get:
+      summary: get 1 user
+      tags:
+        - user
+      parameters:
+        - name: id
+          in: path
+          description: objectId of user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/User'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    patch:
+      summary: update 1 user
+      tags:
+        - user
+      parameters:
+        - name: id
+          in: path
+          description: objectId of user
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Apply_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    delete:
+      summary: delete 1 user
+      tags:
+        - user
+      parameters:
+        - name: id
+          in: path
+          description: objectId of user
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/User'      
         '400':
           description: Invalid ID supplied
         '500':
