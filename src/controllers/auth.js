@@ -8,10 +8,10 @@ exports.register = async (req, res, next) => {
   // Our register logic starts here
   try {
     // Get user input
-    const { first_name, last_name, email, password } = req.body;
+    const { firstName, lastName, email, password } = req.body;
 
     // Validate user input
-    if (!(email && password && first_name)) {
+    if (!(email && password && firstName)) {
       return sendError(res, "All input is required")
     }
 
@@ -28,8 +28,8 @@ exports.register = async (req, res, next) => {
 
     // Create user in our database
     const user = await User.create({
-      first_name,
-      last_name,
+      firstName,
+      lastName,
       email: email.toLowerCase(), // sanitize: convert email to lowercase
       password: encryptedPassword,
       // Add default avatar
@@ -60,7 +60,7 @@ exports.login = async (req, res, next) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       // Create token
       const access_token = jwt.sign(
-        { user_id: user._id, role : user.role },
+        { user_id: user.id, role : user.role },
         process.env.ACCESS_TOKEN_KEY,
         {
           expiresIn: "2h",
@@ -69,7 +69,7 @@ exports.login = async (req, res, next) => {
 
       // Create token
       const refresh_token = jwt.sign(
-        { user_id: user._id, role : user.role },
+        { user_id: user.id, role : user.role },
         process.env.REFRESH_TOKEN_KEY,
         {
           expiresIn: "30d",
@@ -107,7 +107,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
       user = await User.create({
         email: email,
-        first_name: name,
+        firstName: name,
         password: encryptedPassword,
         avatarUrl: avatar,
       });
@@ -115,7 +115,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const access_token = jwt.sign(
-      { user_id: user._id, role : user.role },
+      { user_id: user.id, role : user.role },
       process.env.ACCESS_TOKEN_KEY,
       {
         expiresIn: "2h",
@@ -124,7 +124,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const refresh_token = jwt.sign(
-      { user_id: user._id, role : user.role },
+      { user_id: user.id, role : user.role },
       process.env.REFRESH_TOKEN_KEY,
       {
         expiresIn: "30d",
@@ -132,14 +132,14 @@ exports.loginWithGoogle = async (req, res, next) => {
     );
 
     // user
-    res.status(200).json({
-      accsess_token: access_token,
-      refresh_token: refresh_token,
-      user_id: user.id,
-      user_name: user.first_name,
-      user_email: user.email,
-      user_avatar: user.avatarUrl,
-    });
+    return sendSuccess(res, 'login success', {
+      accsessToken: access_token,
+      refreshToken: refresh_token,
+      userId: user.id,
+      userName: user.firstName,
+      userEmail: user.email,
+      userAvatar: user.avatarUrl,
+    })
     
   } catch (err) {
     console.log(err);

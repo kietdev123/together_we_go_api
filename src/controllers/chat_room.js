@@ -6,10 +6,10 @@ const message_name = "chat_room";
 exports.create = async (req, res, next) => {
   try {
     let data = new ChatRoom({
-      userId_1: new mongoose.Types.ObjectId(req.body.userId_1),
-      userId_2: new mongoose.Types.ObjectId(req.body.userId_2),
-      user1: new mongoose.Types.ObjectId(req.body.userId_1),
-      user2: new mongoose.Types.ObjectId(req.body.userId_2),
+      userId1: new mongoose.Types.ObjectId(req.body.userId1),
+      userId2: new mongoose.Types.ObjectId(req.body.userId2),
+      user1: new mongoose.Types.ObjectId(req.body.userId1),
+      user2: new mongoose.Types.ObjectId(req.body.userId2),
     });
     await data.save();
     return sendSuccess(res, `${message_name} added succesfully`, data);
@@ -24,7 +24,7 @@ exports.create = async (req, res, next) => {
 exports.getList = async (req, res, next) => {
   try {
     let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, user1_id, user2_id} = req.query;
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt, user1Id, user2Id} = req.query;
     let skipNum = 0;
 
     if (page) page = Number(page);
@@ -36,40 +36,40 @@ exports.getList = async (req, res, next) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    if (user1_id && !user2_id){
+    if (user1Id && !user2Id){
       filter = {
         $or: [
           {
-            userId_1: new mongoose.Types.ObjectId(user1_id),
+            userId1: new mongoose.Types.ObjectId(user1Id),
           },
           {
-            userId_2: new mongoose.Types.ObjectId(user1_id),
+            userId2: new mongoose.Types.ObjectId(user1Id),
           },
         ],
       }
     }
-    if (!user1_id && user2_id){
+    if (!user1Id && user2Id){
       filter = {
         $or: [
           {
-            userId_1: new mongoose.Types.ObjectId(user2_id),
+            userId1: new mongoose.Types.ObjectId(user2Id),
           },
           {
-            userId_2: new mongoose.Types.ObjectId(user2_id),
+            userId2: new mongoose.Types.ObjectId(user2Id),
           },
         ],
       }
     }
-    if (user1_id && user2_id){
+    if (user1Id && user2Id){
       filter = {
         $or: [
           {
-            userId_1: new mongoose.Types.ObjectId(user1_id),
-            userId_2: new mongoose.Types.ObjectId(user2_id),
+            userId1: new mongoose.Types.ObjectId(user1Id),
+            userId2: new mongoose.Types.ObjectId(user2Id),
           },
           {
-            userId_2: new mongoose.Types.ObjectId(user1_id),
-            userId_1: new mongoose.Types.ObjectId(user2_id),
+            userId2: new mongoose.Types.ObjectId(user1Id),
+            userId1: new mongoose.Types.ObjectId(user2Id),
           },
         ],
       }
@@ -99,8 +99,8 @@ exports.getList = async (req, res, next) => {
 exports.getOne = async (req, res) => {
   try {
     let data = await ChatRoom.findById(req.params.id)
-      // .populate("user1", { id: 1, first_name: 1 })
-      // .populate("user2", { id: 1, first_name: 1 });
+      // .populate("user1", { id: 1, firstName: 1 })
+      // .populate("user2", { id: 1, firstName: 1 });
       .populate("user1")
       .populate("user2")
       .populate("lastMessage");

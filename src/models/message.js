@@ -8,7 +8,17 @@ const messageSchema = new mongoose.Schema(
         message: { type: String, required: true },
         type: { type: String, required: true, enum: MESSAGE_TYPE },
     },
-    { timestamps: true, }
+    {
+        timestamps: true,
+        toJSON: {
+            transform: (doc, obj) => {
+              obj.id = obj._id;
+              delete obj.__v;
+              delete obj._id;
+              return obj;
+          }
+        }
+      }
 );
 
 module.exports = mongoose.model("message", messageSchema);

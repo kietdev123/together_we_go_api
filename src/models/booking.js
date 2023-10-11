@@ -3,7 +3,7 @@ const userSchema = require("./user.js");
 const Booking = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: userSchema,
+    ref: 'user',
     require: true,
   },
   status: {
@@ -75,6 +75,18 @@ const Booking = new mongoose.Schema({
     require: true,
   },
 },
-{ timestamps: true }
+{
+  timestamps: true,
+  toJSON: {
+      transform: (doc, obj) => {
+        obj.id = obj._id;
+        delete obj.__v;
+        delete obj._id;
+        return obj;
+    }
+  }
+}
 );
+
+
 module.exports = mongoose.model("booking", Booking);

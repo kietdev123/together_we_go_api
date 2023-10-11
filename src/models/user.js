@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const { USER_GENDER, USER_ROLE } = require("../contrants.js");
 
 const userSchema = new mongoose.Schema({
-  first_name: { type: String, default: null },
-  last_name: { type: String, default: null },
+  firstName: { type: String, default: null },
+  lastName: { type: String, default: null },
   email: { type: String, unique: true },
   password: { type: String },
   avatarUrl: {
@@ -21,16 +21,27 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   time: { type: Date },
-  birth_date: { type: String },
+  birthDate: { type: String },
   gender: { type: String, default: "male", enum : USER_GENDER }, // "male" or "female"
-  location_id: { type: String, default: "" },
-  location_mainText: { type: String, default: "" },
-  location_address: { type: String, default: "" },
+  locationId: { type: String, default: "" },
+  locationMainText: { type: String, default: "" },
+  locationAddress: { type: String, default: "" },
   role: { type: String, default: USER_ROLE.USER, enum : USER_ROLE },
   isCalling: {
     type: Boolean,
     default: false,
   },
-});
+},
+{
+  toJSON: {
+      transform: (doc, obj) => {
+        obj.id = obj._id;
+        delete obj.__v;
+        delete obj._id;
+        return obj;
+    }
+  }
+}
+);
 
 module.exports = mongoose.model("user", userSchema);
