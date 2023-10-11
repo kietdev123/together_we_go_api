@@ -29,9 +29,9 @@ paths:
             schema:
               type: object
               properties:
-                first_name:
+                firstName:
                   type: string
-                last_name:
+                lastName:
                   type: string
                 email:
                   type: string
@@ -381,12 +381,12 @@ paths:
               - 1
               - -1
         - in: query
-          name: applyer_id
+          name: applyerid
           schema:
             type: string
             description: objectId of user 
         - in: query
-          name: booking_id
+          name: bookingid
           schema:
             type: string
             description: objectId of booking                 
@@ -559,12 +559,12 @@ paths:
               - 1
               - -1
         - in: query
-          name: user1_id
+          name: user1id
           schema:
             type: string
             description: objectId of user 
         - in: query
-          name: user2_id
+          name: user2id
           schema:
             type: string
             description: objectId of user                
@@ -698,7 +698,7 @@ paths:
               - 1
               - -1
         - in: query
-          name: chat_room_id
+          name: chat_roomid
           schema:
             type: string
             description: objectId of chat room              
@@ -840,7 +840,7 @@ paths:
               - 1
               - -1
         - in: query
-          name: receiver_id
+          name: receiverid
           schema:
             type: string
             description: objectId of user            
@@ -917,7 +917,7 @@ paths:
                   type: string
                 birth_date:          
                   type: string
-                location_id:          
+                locationid:          
                   type: string
                 location_mainText:
                   type: string
@@ -1171,7 +1171,7 @@ paths:
               - 1
               - -1
         - in: query
-          name: receiver_id
+          name: receiverid
           schema:
             type: string
             description: objectId of user             
@@ -1207,7 +1207,7 @@ components:
     Apply_post:
       type: object
       properties:
-        deal_price:
+        dealPrice:
           type: integer
           format: int64
           example: 198772
@@ -1228,7 +1228,7 @@ components:
     Apply_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
@@ -1259,10 +1259,6 @@ components:
     Booking_post:
       type: object
       properties:
-        authorId:
-          type: string
-          description: objectId
-          example: "string"
         status:
           type: string
           example: "string"
@@ -1271,6 +1267,9 @@ components:
           format: int64
           example: 198772
         bookingType:
+          type: string
+          example: "string"
+        content:
           type: string
           example: "string"
         time:
@@ -1323,7 +1322,7 @@ components:
     Booking_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
@@ -1402,7 +1401,7 @@ components:
     Chat_room_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
@@ -1457,7 +1456,7 @@ components:
     Message_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
@@ -1489,11 +1488,11 @@ components:
     Review_post:
       type: object
       properties:
-        receiver_id:
+        receiverid:
           type: string
           description: objectId
           example: "string"
-        apply_id:
+        applyid:
           type: string
           description: objectId
           example: "string"
@@ -1509,7 +1508,7 @@ components:
     Review_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
@@ -1537,14 +1536,14 @@ components:
     User:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"
-        first_name:
+        firstName:
           type: string
           example: "string"
-        last_name:
+        lastName:
           type: string
           example: "string"
         email:
@@ -1562,7 +1561,7 @@ components:
         time:
           type: string
           example: "string"
-        birth_date:
+        birthDate:
           type: string
           example: "string"
         gender:
@@ -1579,13 +1578,13 @@ components:
           enum:
             - 'user'
             - 'admin'
-        location_id:
+        locationId:
           type: string
           example: "string"
-        location_mainText:
+        locationMainText:
           type: string
           example: "string"
-        location_address:
+        locationAddress:
           type: string
           example: "string"
         createdAt:
@@ -1615,7 +1614,7 @@ components:
     Notification_get:
       type: object
       properties:
-        _id:
+        id:
           type: string
           description: objectId
           example: "string"

@@ -3,6 +3,7 @@ const sendSuccess = (res, message, data = null, total = null) => {
         success: true,
         message: message
     }
+
     if (total) responseJson.total = total
     if (data) responseJson.data = data
     return res.status(200).json(responseJson)

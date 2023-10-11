@@ -25,7 +25,7 @@ exports.create = async (req, res, next) => {
     let data = new Apply({
       applyer: new mongoose.Types.ObjectId(req.user.user_id),
       note: req.body.note,
-      deal_price: Number(req.body.deal_price),
+      dealPrice: Number(req.body.dealPrice),
       booking: new mongoose.Types.ObjectId(req.body.booking),
       state: "waiting",
     });
@@ -47,7 +47,7 @@ exports.update = async (req, res, next) => {
     .populate("booking");
 
     if (req.body.state == "close") {
-      await Booking.findByIdAndUpdate(apply.booking._id, {status : 'complete'});
+      await Booking.findByIdAndUpdate(apply.booking.id, {status : 'complete'});
     }
 
     return sendSuccess(res, `Update 1 ${message_name} successfully`, data);

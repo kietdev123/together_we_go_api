@@ -8,7 +8,17 @@ const reviewSchema = new mongoose.Schema(
     note: { type: String, default: "" },
     star: { type: Number, default: 0 },
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+        transform: (doc, obj) => {
+          obj.id = obj._id;
+          delete obj.__v;
+          delete obj._id;
+          return obj;
+      }
+    }
+  }
 );
 
 module.exports = mongoose.model("review", reviewSchema);

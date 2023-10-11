@@ -43,10 +43,10 @@ exports.getList = async (req, res, next) => {
         filter = {
           $or: [
             {
-              first_name : {$regex: keyword}
+              firstName : {$regex: keyword}
             },
             {
-              last_name : {$regex: keyword}
+              lastName : {$regex: keyword}
             },
             {
               email : {$regex: keyword}
