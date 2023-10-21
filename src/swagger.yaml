@@ -559,12 +559,12 @@ paths:
               - 1
               - -1
         - in: query
-          name: user1id
+          name: userId1
           schema:
             type: string
             description: objectId of user 
         - in: query
-          name: user2id
+          name: userId2
           schema:
             type: string
             description: objectId of user                
@@ -1388,11 +1388,11 @@ components:
     Chat_room_post:
       type: object
       properties:
-        userId_1:
+        userId1:
           type: string
           description: objectId
           example: "string"
-        userId_2:
+        userId2:
           type: string
           description: objectId
           example: "string"
@@ -1405,13 +1405,13 @@ components:
           type: string
           description: objectId
           example: "string"
-        userId_1:
+        userId1:
           type: string
           description: objectId
           example: "string"
         user1:
           $ref: '#/components/schemas/User'
-        userId_2:
+        userId2:
           type: string
           description: objectId
           example: "string"

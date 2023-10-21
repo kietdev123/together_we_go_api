@@ -63,7 +63,7 @@ exports.login = async (req, res, next) => {
         { user_id: user.id, role : user.role },
         process.env.ACCESS_TOKEN_KEY,
         {
-          expiresIn: "2h",
+          expiresIn: "365d",
         }
       );
 
