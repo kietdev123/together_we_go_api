@@ -8,7 +8,7 @@ exports.create = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.body.booking);
 
-    if (booking.authorId == req.body.applyer_Id){
+    if (booking.authorId == req.body.user_id){
       return sendError(res, "Không thể tham gia vào chuyến đi của bạn, vui lòng chọn chuyến khác!");
     }
     

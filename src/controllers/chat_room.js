@@ -24,7 +24,7 @@ exports.create = async (req, res, next) => {
 exports.getList = async (req, res, next) => {
   try {
     let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, user1Id, user2Id} = req.query;
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt, userId1, userId2} = req.query;
     let skipNum = 0;
 
     if (page) page = Number(page);
@@ -36,40 +36,40 @@ exports.getList = async (req, res, next) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    if (user1Id && !user2Id){
+    if (userId1 && !userId2){
       filter = {
         $or: [
           {
-            userId1: new mongoose.Types.ObjectId(user1Id),
+            userId1: new mongoose.Types.ObjectId(userId1),
           },
           {
-            userId2: new mongoose.Types.ObjectId(user1Id),
+            userId2: new mongoose.Types.ObjectId(userId1),
           },
         ],
       }
     }
-    if (!user1Id && user2Id){
+    if (!userId1 && userId2){
       filter = {
         $or: [
           {
-            userId1: new mongoose.Types.ObjectId(user2Id),
+            userId1: new mongoose.Types.ObjectId(userId2),
           },
           {
-            userId2: new mongoose.Types.ObjectId(user2Id),
+            userId2: new mongoose.Types.ObjectId(userId2),
           },
         ],
       }
     }
-    if (user1Id && user2Id){
+    if (userId1 && userId2){
       filter = {
         $or: [
           {
-            userId1: new mongoose.Types.ObjectId(user1Id),
-            userId2: new mongoose.Types.ObjectId(user2Id),
+            userId1: new mongoose.Types.ObjectId(userId1),
+            userId2: new mongoose.Types.ObjectId(userId2),
           },
           {
-            userId2: new mongoose.Types.ObjectId(user1Id),
-            userId1: new mongoose.Types.ObjectId(user2Id),
+            userId2: new mongoose.Types.ObjectId(userId1),
+            userId1: new mongoose.Types.ObjectId(userId2),
           },
         ],
       }
