@@ -4,7 +4,6 @@ const { sendSuccess, sendError, sendServerError} = require("../utils/client.js")
 const message_name = "message";
 const mongoose = require("mongoose");
 const chatFeature = require("../sockets/features/chat.feature.js");
-
 exports.create = async (req, res, next) => {
   try {
     let data = new Message({
@@ -15,10 +14,20 @@ exports.create = async (req, res, next) => {
     });
 
     await data.save();
+    console.log(data);
+    let message;
+    await Promise.all([
+      Message.find({_id : data._id}).populate("userId").then((value) => {
+        message = value;
+      }),
+      ChatRoom.findByIdAndUpdate(req.body.chatRoomId, {
+        lastMessage: new mongoose.Types.ObjectId(data._id)
+      })
+    ]);
+    
+    chatFeature.sendMessage(message[0]);
 
-    chatFeature.sendMessage(data);
-
-    return sendSuccess(res, `${message_name} added succesfully`, data);
+    return sendSuccess(res, `${message_name} added succesfully`, message[0]);
 
   } catch (error) {
     console.log(error);
@@ -44,6 +53,7 @@ exports.getList = async (req, res, next) => {
     let filter = {};
     let {page, pageSize, sortCreatedAt, sortUpdatedAt, chat_room_id} = req.query;
     let skipNum = 0;
+    let userId = req.user.user_id;
 
     if (page) page = Number(page);
     else page = 1
@@ -60,11 +70,28 @@ exports.getList = async (req, res, next) => {
     if (sortCreatedAt) _sort.createdAt = Number(sortCreatedAt);
     if (sortUpdatedAt) _sort.updatedAt = Number(sortUpdatedAt);
 
-    const datas = await Message
-    .find(filter)
-    .sort(_sort)
-    .skip(skipNum)
-    .limit(pageSize)
+    let datas;
+    await  Promise.all([
+      Message
+        .find(filter)
+        .sort(_sort)
+        .skip(skipNum)
+        .limit(pageSize)
+        .populate("userId").then((value) => {
+          datas = value;
+      }),
+    ]);
+
+    const chatRoom = await ChatRoom.findById(chat_room_id);
+
+    if (chatRoom.userId1.toString() == userId){
+      chatRoom.numUnwatched1 = 0;
+    }
+    else {
+      chatRoom.numUnwatched2 = 0;
+    }
+
+    await chatRoom.save();
     
     return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
 

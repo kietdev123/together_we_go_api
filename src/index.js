@@ -11,10 +11,13 @@ server.listen(port, () => {
 });
 
 // Connect socket (with cors, for web app)
-module.exports.io = require("socket.io")(server, {
+let io = require("socket.io")(server, {
   cors: {
     origin: "*",
   },
 });
-
+exports.io = io;
 require("./sockets/socket");
+require("./sockets/features/chat.feature");
+require("./controllers/message");
+
