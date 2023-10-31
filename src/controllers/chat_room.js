@@ -26,7 +26,9 @@ exports.getList = async (req, res, next) => {
     let filter = {};
     let {page, pageSize, sortCreatedAt, sortUpdatedAt, userId1, userId2} = req.query;
     let skipNum = 0;
-
+    
+    userId1 = req.user.user_id;
+    
     if (page) page = Number(page);
     else page = 1
 
@@ -86,7 +88,12 @@ exports.getList = async (req, res, next) => {
     .limit(pageSize)
     .populate("user1")
     .populate("user2")
-    .populate("lastMessage");
+    .populate({
+      path : 'lastMessage',
+      populate : {
+        path : 'userId'
+      }
+    })
     
     return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
 

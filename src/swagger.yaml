@@ -698,7 +698,7 @@ paths:
               - 1
               - -1
         - in: query
-          name: chat_roomid
+          name: chat_room_id
           schema:
             type: string
             description: objectId of chat room              

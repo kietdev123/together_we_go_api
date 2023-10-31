@@ -1,11 +1,13 @@
-const {io} = require('../../index.js');
+
 const chat_room = require('../../models/chat_room');
-const UserData = require('../data/user.js');
+const UserData = require('../data/user');
+
 
 exports.chat_feature_init = (client) => {
+
   client.on("join_chat_room", (data) => {
     try {
-      console.log("join chat room");
+      console.log("join chat room ", data["chat_room_id"]);
       let chat_room_id = data["chat_room_id"];
       client.join(chat_room_id);
     } catch (error) {
@@ -15,7 +17,7 @@ exports.chat_feature_init = (client) => {
 
   client.on("leave_chat_room", (data) => {
     try {
-      console.log("leave chat room");
+      console.log("leave chat room ,",data["chat_room_id"]);
       let chat_room_id = data["chat_room_id"];
       client.leave(chat_room_id);
     } catch (error) {
@@ -26,29 +28,52 @@ exports.chat_feature_init = (client) => {
 
 exports.sendMessage = async (message) => { 
   try {
-    let sockets = await io.in(message["chatRoomId"]).fetchSockets();
-    let usersInRoom = sockets.length;
+    const {io} = require('../../index.js');
+    // console.log('2',io);
 
+    // console.log(message);
+    console.log(io.sockets.adapter.rooms);
+    
+    //  let sockets = await io.in(message["chatRoomId"]).fetchSockets();
+   let usersInRoom = io.sockets.adapter.rooms.get(message["chatRoomId"].toString()).size;
+    // let usersInRoom = sockets.size;
+    // console.log(sockets);
     if (usersInRoom == 1) {   
-      const chatRoom = await chat_room.findById(message["chatRoomId"]).lean();
+      const chatRoom = await chat_room.findById(message["chatRoomId"]);
       let receiver_id;
-      if (chatRoom.userId_1 == message.userId) receiver_id = chatRoom.userId_2;
-      else receiver_id = chatRoom.userId_1;
-      const receiver_socket_id = await UserData.get(receiver_id).socket_id;
-      const _name = await UserData.get(message.userId).name;
+      if (chatRoom.userId1 == message.userId.id) {
+        receiver_id = chatRoom.userId2;
+        chatRoom.numUnwatched2++;
+      }
+      else {
+        receiver_id = chatRoom.userId1;
+        chatRoom.numUnwatched1++;
+      }
+      await chatRoom.save();
+      const receiver_socket_id = await UserData.getSocket(receiver_id);
+
+      // const _name = await UserData.get(message.userId).name;
       
       io.to(receiver_socket_id).emit(
         "receive_notification", 
         {
-          notification_body: _name + " đã gửi bạn 1 tin nhắn",
+          notification_body: "Đã nhận 1 tin nhắn mới",
           notification_name_screen: "chat_screen",
         }
       );
+
+      io.to(receiver_socket_id).emit("reload_chat_room", {});
     }
-    io.in(message["chatRoomId"]).emit(
+    const roomId = message["chatRoomId"];
+    const receiver_socket_id = await UserData.getSocket(message["userId"]["id"]);
+    // io.to(receiver_socket_id).emit(
+    //   "receive_message",
+    //   message
+    // );
+    io.in(roomId.toString()).emit(
       "receive_message",
       message
-    ); 
+    );
   } catch (error) {
     console.log(error);
   }

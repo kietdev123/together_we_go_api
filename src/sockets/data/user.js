@@ -11,9 +11,18 @@ exports.get = async (uid = "") => {
   return socketIds[uid];
 };
 
+exports.getSocket = async (uid = "") => {
+  return users[uid].socket_id;
+};
+
+
 exports.updateSocket = async (uid = "", socket_id) => {
   try {
+    if (users[uid] == null) {
+      users[uid] = {};
+    }
     users[uid].socket_id = socket_id;
+    console.log(users)
   } catch (error) {
     console.log("user updateSocket error");
     console.log(error);
