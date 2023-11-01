@@ -60,7 +60,7 @@ exports.login = async (req, res, next) => {
     if (user && (await bcrypt.compare(password, user.password))) {
       // Create token
       const access_token = jwt.sign(
-        { user_id: user.id, role : user.role },
+        { user_id: user.id, role : user.role, email : user.email },
         process.env.ACCESS_TOKEN_KEY,
         {
           expiresIn: "365d",
@@ -69,7 +69,7 @@ exports.login = async (req, res, next) => {
 
       // Create token
       const refresh_token = jwt.sign(
-        { user_id: user.id, role : user.role },
+        { user_id: user.id, role : user.role, email : user.email },
         process.env.REFRESH_TOKEN_KEY,
         {
           expiresIn: "30d",
@@ -115,7 +115,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const access_token = jwt.sign(
-      { user_id: user.id, role : user.role },
+      { user_id: user.id, role : user.role, email : user.email },
       process.env.ACCESS_TOKEN_KEY,
       {
         expiresIn: "2h",
@@ -124,7 +124,7 @@ exports.loginWithGoogle = async (req, res, next) => {
 
     // Create token
     const refresh_token = jwt.sign(
-      { user_id: user.id, role : user.role },
+      { user_id: user.id, role : user.role, email : user.email },
       process.env.REFRESH_TOKEN_KEY,
       {
         expiresIn: "30d",
