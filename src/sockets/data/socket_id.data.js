@@ -1,16 +1,16 @@
 let socketIds = {};
 // {
-//     'socket_id' : 'userId'
+//     'email' : 'socket'
 // }
 
 exports.get = async (socket_id = "") => {
   return socketIds[socket_id];
 };
 
-exports.update = async (socket_id, uid) => {
+exports.update = async (socket_id, email) => {
   try {
-    socketIds[socket] = uid;
-    console.log(socketIds);
+    socketIds[email] = socket_id;
+    console.log('Socket data : ',socketIds);
   } catch (error) {
     console.log("updateSocketId error");
     console.log(error);
