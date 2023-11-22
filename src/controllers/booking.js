@@ -57,12 +57,15 @@ exports.getList = async (req, res) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    if (status) filter.status = status;
-    if (authorId) filter.authorId = new mongoose.Types.ObjectId(authorId);
+    if (status != null && status != undefined && status != '') filter.status = status;
+    if (authorId != null && authorId != undefined && authorId != '') filter.authorId = new mongoose.Types.ObjectId(authorId);
 
     let _sort = {};
-    if (sortCreatedAt) _sort.createdAt = Number(sortCreatedAt);
-    if (sortUpdatedAt) _sort.updatedAt = Number(sortUpdatedAt);
+    if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
+       _sort.createdAt = Number(sortCreatedAt);
+
+    if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
+       _sort.updatedAt = Number(sortUpdatedAt);
 
     const bookings = await Booking
     .find(filter)

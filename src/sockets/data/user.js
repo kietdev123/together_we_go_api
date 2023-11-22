@@ -12,7 +12,11 @@ exports.get = async (uid = "") => {
 };
 
 exports.getSocket = async (uid = "") => {
-  return users[uid].socket_id;
+  try {
+    return users[uid].socket_id;
+  } catch (e) {
+    return null;
+  }
 };
 
 
