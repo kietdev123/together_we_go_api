@@ -50,19 +50,22 @@ exports.sendMessage = async (message) => {
         chatRoom.numUnwatched1++;
       }
       await chatRoom.save();
+      console.log(receiver_id);
       const receiver_socket_id = await UserData.getSocket(receiver_id);
-
-      // const _name = await UserData.get(message.userId).name;
+      if (receiver_socket_id == null || receiver_socket_id == undefined){
+              // const _name = await UserData.get(message.userId).name;
       
-      io.to(receiver_socket_id).emit(
-        "receive_notification", 
-        {
-          notification_body: "Đã nhận 1 tin nhắn mới",
-          notification_name_screen: "chat_screen",
-        }
-      );
+          io.to(receiver_socket_id).emit(
+            "receive_notification", 
+            {
+              notification_body: "Đã nhận 1 tin nhắn mới",
+              notification_name_screen: "chat_screen",
+            }
+          );
 
-      io.to(receiver_socket_id).emit("reload_chat_room", {});
+          io.to(receiver_socket_id).emit("reload_chat_room", {});
+      }
+
     }
     const roomId = message["chatRoomId"];
     const receiver_socket_id = await UserData.getSocket(message["userId"]["id"]);
