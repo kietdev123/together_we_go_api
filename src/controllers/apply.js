@@ -60,7 +60,7 @@ exports.update = async (req, res, next) => {
 exports.getList = async (req, res, next) => {
   try {
     let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, applyer_id, booking_id} = req.query;
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt, applyerId, bookingId} = req.query;
     let skipNum = 0;
 
     if (page) page = Number(page);
@@ -72,11 +72,15 @@ exports.getList = async (req, res, next) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    if (applyer_id != null && applyer_id != undefined && applyer_id != '')
-       filter.applyer = new mongoose.Types.ObjectId(applyer_id);
+    if (applyerId != null && applyerId != undefined && applyerId != '')
+       filter.applyer = new mongoose.Types.ObjectId(applyerId);
 
-    if (booking_id != null && booking_id != undefined && booking_id != '')
-      filter.booking = new mongoose.Types.ObjectId(booking_id);
+    if (bookingId != null && bookingId != undefined && bookingId != '') {
+      filter.booking = new mongoose.Types.ObjectId(bookingId);
+    }
+    else {
+      filter.applyer = new mongoose.Types.ObjectId(req.user.user_id);
+    }
 
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
@@ -96,7 +100,7 @@ exports.getList = async (req, res, next) => {
         path: "authorId",
       },
     });
-    
+   
     return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
 
   } catch (e) {
