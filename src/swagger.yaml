@@ -381,12 +381,12 @@ paths:
               - 1
               - -1
         - in: query
-          name: applyerid
+          name: applyerId
           schema:
             type: string
             description: objectId of user 
         - in: query
-          name: bookingid
+          name: bookingId
           schema:
             type: string
             description: objectId of booking                 
