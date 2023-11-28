@@ -19,6 +19,8 @@ const bookingRoutes = require("./routes/booking.js");
 const applyRoutes = require("./routes/apply.js");
 const reviewRoutes = require("./routes/review.js");
 const notificationRoutes = require("./routes/notification.js");
+const locationHistorySearchRoutes = require("./routes/location_history_search.js");
+const locationSavedRoutes = require("./routes/location_saved.js");
 const morgan =  require("morgan");
 const useragent =  require('express-useragent');
 const requestIp =  require('request-ip')
@@ -61,5 +63,7 @@ app.use("/api/booking", verifyToken, bookingRoutes);
 app.use("/api/apply", verifyToken, applyRoutes);
 app.use("/api/review", verifyToken, reviewRoutes);
 app.use("/api/notification", verifyToken, notificationRoutes);
+app.use("/api/location-history-search", verifyToken, locationHistorySearchRoutes);
+app.use("/api/location-saved", verifyToken, locationSavedRoutes);
 
 module.exports = app;
