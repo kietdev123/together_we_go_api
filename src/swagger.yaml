@@ -1202,6 +1202,410 @@ paths:
           description: Server internal error
       security:
         - api_key: []
+  /location-history-search/{id}:
+    get:
+      summary: user get one location-history-search
+      tags:
+        - location-history-search
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-history-search
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_history_search_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    put:
+      summary: user update 1 location-history-search
+      tags:
+        - location-history-search
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-history-search
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_history_search_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    delete:
+      summary: user delete 1 location-history-search
+      tags:
+        - location-history-search
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-history-search
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_history_search_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /location-history-search:
+    post:
+      summary: user create location history search
+      tags:
+        - location-history-search
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_history_search_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_history_search_post'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    get:
+      summary: user get location-history-search
+      tags:
+        - location-history-search
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer         
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer
+            enum:
+              - 1
+              - -1        
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/location_history_search_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /location-saved/{id}:
+    get:
+      summary: user get one location-saved
+      tags:
+        - location-saved
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-saved
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_saved_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    put:
+      summary: user update 1 location-saved
+      tags:
+        - location-saved
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-saved
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_saved_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    delete:
+      summary: user delete 1 location-saved
+      tags:
+        - location-saved
+      parameters:
+        - name: id
+          in: path
+          description: objectId of location-saved
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_saved_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+  /location-saved:
+    post:
+      summary: user create location history search
+      tags:
+        - location-saved
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/location_saved_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/location_saved_post'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    get:
+      summary: user get location-saved
+      tags:
+        - location-saved
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer         
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer
+            enum:
+              - 1
+              - -1        
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/location_saved_post'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
 components:
   schemas:
     Apply_post:
@@ -1627,6 +2031,48 @@ components:
           $ref: '#/components/schemas/User'
       xml:
         name: notification
+    location_history_search_post:
+      type: object
+      properties:
+        placeName:
+          type: string
+          example: "string"
+        placeDescription:
+          type: string
+          example: "string"
+        placeId:
+          type: string
+          example: "string"
+        placeGeoCode:
+          type: string
+          example: "string"
+      xml:
+        name: location_history_search
+    location_saved_post:
+      type: object
+      properties:
+        type:
+          type: string
+          example: "string"
+          default: 'home'
+          enum:
+            - 'home'
+            - 'company'
+            - 'other'
+        placeName:
+          type: string
+          example: "string"
+        placeDescription:
+          type: string
+          example: "string"
+        placeId:
+          type: string
+          example: "string"
+        placeGeoCode:
+          type: string
+          example: "string"
+      xml:
+        name: location_saved
     ApiResponse:
       type: object
       properties:

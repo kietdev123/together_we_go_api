@@ -29,3 +29,9 @@ module.exports.CALL_TYPE = {
     VIDEO : 'video',
     AUDIO : 'audio',
   };
+
+module.exports.LOCATION_TYPE = {
+    HOME : 'home',
+    COMPANY : 'company',
+    OTHER : 'other',
+  };
