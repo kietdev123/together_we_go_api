@@ -8,7 +8,8 @@ const Booking = new mongoose.Schema({
   },
   status: {
     type: String,
-    require: true,
+    require: true, 
+    // complete,   available,   cancel,
   },
   price: {
     type: Number,

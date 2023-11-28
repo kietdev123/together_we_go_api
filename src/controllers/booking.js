@@ -7,7 +7,7 @@ exports.create = (req, res) => {
     const booking = new Booking({
       authorId: req.user.user_id,
       price: req.body.price,
-      status: req.body.status,
+      status: 'available',
       bookingType: req.body.bookingType,
       time: req.body.time,
       content: req.body.content,
@@ -59,6 +59,46 @@ exports.getList = async (req, res) => {
 
     if (status != null && status != undefined && status != '') filter.status = status;
     if (authorId != null && authorId != undefined && authorId != '') filter.authorId = new mongoose.Types.ObjectId(authorId);
+
+    let _sort = {};
+    if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
+       _sort.createdAt = Number(sortCreatedAt);
+
+    if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
+       _sort.updatedAt = Number(sortUpdatedAt);
+
+    const bookings = await Booking
+    .find(filter)
+    .sort(_sort)
+    .skip(skipNum)
+    .limit(pageSize)
+    .populate("authorId")
+    
+    return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
+
+  } catch (e) {
+    console.log(e);
+    return sendServerError(res);
+  }
+};
+
+
+exports.getMyList = async (req, res) => {
+  try {
+    let filter = {};
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt, status, authorId} = req.query;
+    let skipNum = 0;
+
+    if (page) page = Number(page);
+    else page = 1
+
+    if (pageSize) pageSize = Number(pageSize);
+    else pageSize = 20;
+
+    skipNum = (page - 1) * pageSize;
+    if (skipNum < 0) skipNum = 0;
+
+    filter.authorId = new mongoose.Types.ObjectId(req.user.user_id,);
 
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')

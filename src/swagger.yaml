@@ -175,6 +175,67 @@ paths:
           description: Invalid ID supplied
         '500':
           description: Server internal error
+  /booking/my-list:
+    get:
+      summary: user get his/her bookings
+      tags:
+        - booking
+      parameters:
+        - in: query
+          name: page
+          required: true
+          schema:
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          required: true
+          schema:
+            type: integer
+            default: 20
+        - in: query
+          name: sortCreatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer         
+            enum:
+              - 1
+              - -1
+        - in: query
+          name: sortUpdatedAt
+          description: -1 means lasted first
+          schema:
+            type: integer
+            enum:
+              - 1
+              - -1          
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
   /booking:
     post:
       summary: create booking
