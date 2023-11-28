@@ -52,7 +52,7 @@ exports.login = async (req, res, next) => {
 
     // Validate user input
     if (!(email && password)) {
-      return sendError(res, "All input is required")
+      return sendError(res, "Tất cả các thông tin đều bắt buộc.")
     }
     // Validate if user exist in our database
     const user = await User.findOne({ email });
@@ -82,7 +82,7 @@ exports.login = async (req, res, next) => {
       })
 
     } else {
-      return sendError(res, "email or password not correct")
+      return sendError(res, "Email hoặc mật khẩu không đúng.")
     }
   } catch (err) {
     console.log(err);
@@ -198,7 +198,7 @@ exports.resetPassword = async (req, res, next) => {
       
     }
     else {
-      return sendError(res, "email or password not correct")
+      return sendError(res, "Email hoặc mật khẩu không đúng.")
     }
 
   } catch (err) {

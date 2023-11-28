@@ -17,6 +17,7 @@ module.exports.APPLY_STATE = {
     WAITING : 'waiting',
     ACCEPTED : 'accepted',
     STARTING : 'starting',
+    CLOSE : 'close',
     REFUSE : 'refuse',
 };
 

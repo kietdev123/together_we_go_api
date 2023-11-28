@@ -3,12 +3,14 @@ const Apply = require("../models/apply");
 const Booking = require("../models/booking");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const message_name = "booking";
+const { sendEvent } = require("../sockets/function/socket.function.js");
+const { APPLY_STATE } = require("../contrants.js");
 
 exports.create = async (req, res, next) => {
   try {
     const booking = await Booking.findById(req.body.booking);
 
-    if (booking.authorId == req.body.user_id){
+    if (booking.authorId == req.user.user_id){
       return sendError(res, "Không thể tham gia vào chuyến đi của bạn, vui lòng chọn chuyến khác!");
     }
     
@@ -19,7 +21,7 @@ exports.create = async (req, res, next) => {
     });
 
     if (oldApply != null && oldApply != undefined) {
-      return sendError(res, "Bạn đã apply vào chuyến đi này rồi !");
+      return sendError(res, "Bạn đã gửi yêu cầu vào chuyến đi này rồi !");
     }
 
     let data = new Apply({
@@ -41,14 +43,43 @@ exports.create = async (req, res, next) => {
 
 exports.update = async (req, res, next) => {
   try {
+    // user call this api is the one who create booking
     let id = req.params.id;
 
-    const data = await Apply.findByIdAndUpdate(id, req.body)
-    .populate("booking");
+    const data = await Apply.findByIdAndUpdate(id, req.body, {new : true})
+    .populate("applyer")
+    .populate({
+      path: "booking",
+      populate: {
+        path: "authorId",
+      },
+    });
 
     if (req.body.state == "close") {
-      await Booking.findByIdAndUpdate(apply.booking.id, {status : 'complete'});
+      await Booking.findByIdAndUpdate(data.booking.id, {status : 'complete'});
     }
+    
+    let text = data.booking.authorId.firstName;
+    if (req.body.state == APPLY_STATE.ACCEPTED)
+      text += " đã đồng ý yêu cầu tham gia chuyến đi của bạn";
+    if (req.body.state == APPLY_STATE.STARTING)
+      text += " đã bắt đầu chuyến đi";
+    if (req.body.state == APPLY_STATE.CLOSE)
+      text += " đã đóng chuyến đi";
+    if (req.body.state == APPLY_STATE.REFUSE)
+      text += " đã từ chối yêu cầu tham gia chuyến đi của bạn";
+
+    // Send notification to applyer
+    sendEvent(data.applyer.id.toString(),"receive_notification",{
+      notification_body: text,
+      notification_name_screen: "chat_screen",
+    });
+
+    // Send reload apply to applyer
+    console.log(data.applyer.id.toString(),' ',req.user.user_id.toString());
+    sendEvent(data.applyer.id.toString(),"reload_apply", {});
+
+    sendEvent(req.user.user_id.toString(),"reload_apply", {});
 
     return sendSuccess(res, `Update 1 ${message_name} successfully`, data);
   } catch (err) {
