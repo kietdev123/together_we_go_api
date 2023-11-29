@@ -899,12 +899,7 @@ paths:
             type: integer
             enum:
               - 1
-              - -1
-        - in: query
-          name: receiverid
-          schema:
-            type: string
-            description: objectId of user            
+              - -1          
       responses:
         '200':
           description: Successful operation
@@ -1853,11 +1848,7 @@ components:
     Chat_room_post:
       type: object
       properties:
-        userId1:
-          type: string
-          description: objectId
-          example: "string"
-        userId2:
+        userId:
           type: string
           description: objectId
           example: "string"
@@ -1953,11 +1944,11 @@ components:
     Review_post:
       type: object
       properties:
-        receiverid:
+        receiverId:
           type: string
           description: objectId
           example: "string"
-        applyid:
+        applyId:
           type: string
           description: objectId
           example: "string"

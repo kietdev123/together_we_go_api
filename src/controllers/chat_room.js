@@ -5,14 +5,48 @@ const message_name = "chat_room";
 
 exports.create = async (req, res, next) => {
   try {
-    let data = new ChatRoom({
-      userId1: new mongoose.Types.ObjectId(req.body.userId1),
-      userId2: new mongoose.Types.ObjectId(req.body.userId2),
-      user1: new mongoose.Types.ObjectId(req.body.userId1),
-      user2: new mongoose.Types.ObjectId(req.body.userId2),
+    if (req.body.userId == req.user.user_id) {
+      return sendError(res, 'Bạn chỉ có thể kết nối với người dùng khác');
+    }
+    let chatRoom = await ChatRoom.findOne({
+      $or : [
+        {
+          user1 : new mongoose.Types.ObjectId(req.body.userId),
+          user2 : new mongoose.Types.ObjectId(req.user.user_id),
+        },
+        {
+          user1 : new mongoose.Types.ObjectId(req.user.user_id),
+          user2 : new mongoose.Types.ObjectId(req.body.userId),
+        },
+      ]
+    })
+    .populate("user1")
+    .populate("user2")
+    .populate({
+      path : 'lastMessage',
+      populate : {
+        path : 'userId'
+      }
     });
-    await data.save();
-    return sendSuccess(res, `${message_name} added succesfully`, data);
+
+    if (chatRoom == null || chatRoom == undefined) {
+      let data = await ChatRoom.create({
+        userId1: new mongoose.Types.ObjectId(req.body.userId),
+        userId2: new mongoose.Types.ObjectId(req.user.user_id),
+        user1: new mongoose.Types.ObjectId(req.body.userId),
+        user2: new mongoose.Types.ObjectId(req.user.user_id),
+      });
+      chatRoom = await ChatRoom.findById(data.id).populate("user1")
+      .populate("user2")
+      .populate({
+        path : 'lastMessage',
+        populate : {
+          path : 'userId'
+        }
+      });
+    }
+   
+    return sendSuccess(res, `${message_name} added succesfully`, chatRoom);
   }
   catch (err) {
     console.log(error);

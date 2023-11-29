@@ -98,7 +98,8 @@ exports.getMyList = async (req, res) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    filter.authorId = new mongoose.Types.ObjectId(req.user.user_id,);
+    filter.authorId = new mongoose.Types.ObjectId(req.user.user_id);
+    console.log(req.user.user_id);
 
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
