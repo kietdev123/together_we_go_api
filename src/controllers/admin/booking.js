@@ -1,6 +1,6 @@
-const Booking = require("../models/booking.js");
+const Booking = require("../../models/booking.js");
 const mongoose = require("mongoose");
-const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
+const { sendSuccess, sendError, sendServerError} = require("../../utils/client.js");
 
 exports.create = (req, res) => {
   try {
@@ -82,47 +82,6 @@ exports.getList = async (req, res) => {
   }
 };
 
-
-exports.getMyList = async (req, res) => {
-  try {
-    let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, status, authorId} = req.query;
-    let skipNum = 0;
-
-    if (page) page = Number(page);
-    else page = 1
-
-    if (pageSize) pageSize = Number(pageSize);
-    else pageSize = 20;
-
-    skipNum = (page - 1) * pageSize;
-    if (skipNum < 0) skipNum = 0;
-
-    filter.authorId = new mongoose.Types.ObjectId(req.user.user_id);
-    console.log(req.user.user_id);
-
-    let _sort = {};
-    if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
-       _sort.createdAt = Number(sortCreatedAt);
-
-    if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
-       _sort.updatedAt = Number(sortUpdatedAt);
-
-    const bookings = await Booking
-    .find(filter)
-    .sort(_sort)
-    .skip(skipNum)
-    .limit(pageSize)
-    .populate("authorId")
-    
-    return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
-
-  } catch (e) {
-    console.log(e);
-    return sendServerError(res);
-  }
-};
-
 exports.getOne = async (req, res) => {
   try {
     const {id} = req.params;
@@ -132,4 +91,26 @@ exports.getOne = async (req, res) => {
     console.log(e);
     return sendServerError(res);
   }
+};
+
+exports.delete = async (req, res) => {
+    try {
+      const {id} = req.params;
+      const booking = await Booking.findByIdAndRemove(id);
+      return sendSuccess(res, "Get 1 booking successfully", booking);
+    } catch (e) {
+      console.log(e);
+      return sendServerError(res);
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+      const {id} = req.params;
+      const booking = await Booking.findByIdAndUpdate(id, res.body);
+      return sendSuccess(res, "Get 1 booking successfully", booking);
+    } catch (e) {
+      console.log(e);
+      return sendServerError(res);
+    }
 };

@@ -12,7 +12,7 @@ exports.register = async (req, res, next) => {
 
     // Validate user input
     if (!(email && password && firstName)) {
-      return sendError(res, "All input is required")
+      return sendError(res, "Tất cả các thông tin đều bắt buộc.")
     }
 
     // check if user already exist
@@ -20,7 +20,7 @@ exports.register = async (req, res, next) => {
     const oldUser = await User.findOne({ email });
 
     if (oldUser) {
-      return sendError(res, "User Already Exist. Please Login")
+      return sendError(res, "Email này đã có")
     }
 
     //Encrypt user password

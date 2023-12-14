@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Notification = require("../models/notification.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const message_name = "notification";
+const dataName = "notification";
 
 exports.create = async (req, res, next) => {
     try {
@@ -12,7 +12,7 @@ exports.create = async (req, res, next) => {
       });
   
       await data.save();
-      return sendSuccess(res, `${message_name} added succesfully`, data);
+      return sendSuccess(res, `${dataName} added succesfully`, data);
   
     } catch (error) {
       console.log(error);
@@ -52,7 +52,7 @@ exports.getList = async (req, res, next) => {
     .populate("receiver")
     .populate("author");
     
-    return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
+    return sendSuccess(res,`Get ${dataName} succesfully`, datas, datas.length);
 
   } catch (e) {
     console.log(e);

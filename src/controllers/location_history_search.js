@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Review = require("../models/review");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const message_name = "Location history search";
+const dataName = "Location history search";
 const LocationHistorySearch = require("../models/location_history_search.js");
 
 exports.create = async (req, res, next) => {
@@ -21,7 +21,7 @@ exports.create = async (req, res, next) => {
 
     const value = await LocationHistorySearch.create(data);
 
-    return sendSuccess(res, `${message_name} added succesfully`, value);
+    return sendSuccess(res, `${dataName} added succesfully`, value);
 
   } catch (error) {
     console.log(error);
@@ -59,7 +59,7 @@ exports.getList = async (req, res, next) => {
     .skip(skipNum)
     .limit(pageSize)
     
-    return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
+    return sendSuccess(res,`Get ${dataName} succesfully`, datas, datas.length);
 
   } catch (e) {
     console.log(e);
@@ -71,7 +71,7 @@ exports.getOne = async (req, res, next) => {
     try {
         const id = req.params.id;
         const data = await LocationHistorySearch.findById(id);
-        return sendSuccess(res, `${message_name} get one succesfully`, data);
+        return sendSuccess(res, `${dataName} get one succesfully`, data);
     } catch (error) {
       console.log(error);
       return sendServerError(res);
@@ -100,7 +100,7 @@ exports.update = async (req, res, next) => {
             new: true
         });
 
-        return sendSuccess(res, `${message_name} update succesfully`, value);
+        return sendSuccess(res, `${dataName} update succesfully`, value);
     
     } catch (error) {
       console.log(error);
@@ -112,7 +112,7 @@ exports.delete = async (req, res, next) => {
     try {
       const id = req.params.id;
       await LocationHistorySearch.findByIdAndRemove(id);
-      return sendSuccess(res, `${message_name} delete succesfully`);
+      return sendSuccess(res, `${dataName} delete succesfully`);
     } catch (error) {
       console.log(error);
       return sendServerError(res);

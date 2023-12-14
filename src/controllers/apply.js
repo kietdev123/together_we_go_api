@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const message_name = "booking";
+const dataName = "booking";
 const { sendEvent } = require("../sockets/function/socket.function.js");
 const { APPLY_STATE } = require("../contrants.js");
 
@@ -81,7 +81,7 @@ exports.update = async (req, res, next) => {
 
     sendEvent(req.user.user_id.toString(),"reload_apply", {});
 
-    return sendSuccess(res, `Update 1 ${message_name} successfully`, data);
+    return sendSuccess(res, `Update 1 ${dataName} successfully`, data);
   } catch (err) {
     console.log(err);
     return sendServerError(res);
@@ -132,7 +132,7 @@ exports.getList = async (req, res, next) => {
       },
     });
    
-    return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
+    return sendSuccess(res,`Get ${dataName} succesfully`, datas, datas.length);
 
   } catch (e) {
     console.log(e);
@@ -151,9 +151,10 @@ exports.getOne = async (req, res) => {
         path: "authorId",
       },
     });
-    return sendSuccess(res, `Get 1 ${message_name} successfully`, data);
+    return sendSuccess(res, `Get 1 ${dataName} successfully`, data);
   } catch (e) {
     console.log(e);
     return sendServerError(res);
   }
 };
+
