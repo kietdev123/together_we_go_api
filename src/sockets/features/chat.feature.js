@@ -1,7 +1,8 @@
 
 const chat_room = require('../../models/chat_room');
 const UserData = require('../data/user');
-
+const Notification = require('../../models/notification');
+const mongoose = require("mongoose");
 
 exports.chat_feature_init = (client) => {
 
@@ -56,6 +57,13 @@ exports.sendMessage = async (message) => {
       console.log(receiver_id, ' ', receiver_socket_id);
       if (receiver_socket_id != null && receiver_socket_id != undefined){
               // const _name = await UserData.get(message.userId).name;
+
+        await Notification.create({
+          receiver: new mongoose.Types.ObjectId(receiver_id),
+          author: new mongoose.Types.ObjectId(message.userId.id),
+          text: "Đã gửi 1 tin nhắn mới",
+        });
+
         console.log('send notification chat');
           io.to(receiver_socket_id).emit(
             "receive_notification", 

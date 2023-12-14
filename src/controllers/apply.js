@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
+const Notification = require("../models/notification.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const dataName = "booking";
 const { sendEvent } = require("../sockets/function/socket.function.js");
@@ -33,6 +34,32 @@ exports.create = async (req, res, next) => {
     });
 
     await data.save();
+
+    data = await Apply
+    .findById(data.id)
+    .populate("applyer")
+    .populate({
+      path: "booking",
+      populate: {
+        path: "authorId",
+      },
+    });
+    
+    await Notification.create({
+      'receiver' : new mongoose.Types.ObjectId(data.booking.authorId.id),
+      'author' : new mongoose.Types.ObjectId(req.user.user_id),
+      'text' : `${data.applyer.firstName} đã yêu cầu tham gia chuyến đi của bạn`,
+    });
+    
+    
+    // Send notification to applyer
+    sendEvent(data.booking.authorId.id,"receive_notification",{
+      notification_body: `${data.applyer.firstName} đã yêu cầu tham gia chuyến đi của bạn`,
+      notification_name_screen: "chat_screen",
+    });
+
+    sendEvent(data.booking.authorId.id,"receive_apply",data);
+    
     return sendSuccess(res, "Apply added succesfully", data);
 
   } catch (error) {
@@ -68,6 +95,12 @@ exports.update = async (req, res, next) => {
       text += " đã đóng chuyến đi";
     if (req.body.state == APPLY_STATE.REFUSE)
       text += " đã từ chối yêu cầu tham gia chuyến đi của bạn";
+
+    await Notification.create({
+      'receiver' : new mongoose.Types.ObjectId(data.applyer.id),
+      'author' : new mongoose.Types.ObjectId(req.user.user_id),
+      'text' : text,
+    });
 
     // Send notification to applyer
     sendEvent(data.applyer.id.toString(),"receive_notification",{

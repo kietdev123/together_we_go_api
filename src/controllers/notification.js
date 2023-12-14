@@ -23,7 +23,7 @@ exports.create = async (req, res, next) => {
 exports.getList = async (req, res, next) => {
   try {
     let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, receiver_id} = req.query;
+    let {page, pageSize, sortCreatedAt, sortUpdatedAt} = req.query;
     let skipNum = 0;
 
     if (page) page = Number(page);
@@ -35,8 +35,7 @@ exports.getList = async (req, res, next) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    if (receiver_id != null && receiver_id != undefined && receiver_id != '')
-      filter.receiver = new mongoose.Types.ObjectId(receiver_id);
+      filter.receiver =  new mongoose.Types.ObjectId(req.user.user_id);
 
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
