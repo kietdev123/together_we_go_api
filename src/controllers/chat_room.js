@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const ChatRoom = require("../models/chat_room.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const message_name = "chat_room";
+const dataName = "chat_room";
 
 exports.create = async (req, res, next) => {
   try {
@@ -46,7 +46,7 @@ exports.create = async (req, res, next) => {
       });
     }
    
-    return sendSuccess(res, `${message_name} added succesfully`, chatRoom);
+    return sendSuccess(res, `${dataName} added succesfully`, chatRoom);
   }
   catch (err) {
     console.log(error);
@@ -129,7 +129,7 @@ exports.getList = async (req, res, next) => {
       }
     })
     
-    return sendSuccess(res,`Get ${message_name} succesfully`, datas, datas.length);
+    return sendSuccess(res,`Get ${dataName} succesfully`, datas, datas.length);
 
   } catch (e) {
     console.log(e);
@@ -146,7 +146,7 @@ exports.getOne = async (req, res) => {
       .populate("user2")
       .populate("lastMessage");
     
-    return sendSuccess(res, `Get 1 ${message_name} successfully`, data);
+    return sendSuccess(res, `Get 1 ${dataName} successfully`, data);
   } catch (e) {
     console.log(e);
     return sendServerError(res);

@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-const Review = require("../models/review");
-const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
+const Review = require("../../models/review");
+const { sendSuccess, sendError, sendServerError} = require("../../utils/client.js");
 const dataName = "review";
 
 exports.create = async (req, res, next) => {
@@ -37,8 +37,6 @@ exports.getList = async (req, res, next) => {
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
 
-    filter.receiver = new mongoose.Types.ObjectId(req.user.user_id);
-
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
       _sort.createdAt = Number(sortCreatedAt);
@@ -61,3 +59,41 @@ exports.getList = async (req, res, next) => {
     return sendServerError(res);
   }
 };
+
+exports.getOne = async (req, res) => {
+    try {
+      const {id} = req.params;
+      const data = await Review.findById(id)
+      .populate("creater")
+      .populate("receiver")
+      .populate("apply");
+
+      return sendSuccess(res, `Get 1 ${dataName} successfully`, data);
+    } catch (e) {
+      console.log(e);
+      return sendServerError(res);
+    }
+};
+
+exports.delete = async (req, res) => {
+    try {
+      const {id} = req.params;
+      const booking = await Review.findByIdAndRemove(id);
+      return sendSuccess(res, `Get 1 ${dataName} successfully`, booking);
+    } catch (e) {
+      console.log(e);
+      return sendServerError(res);
+    }
+};
+
+exports.update = async (req, res) => {
+    try {
+      const {id} = req.params;
+      const booking = await Review.findByIdAndUpdate(id, res.body);
+      return sendSuccess(res, `Get 1 ${dataName} successfully`, booking);
+    } catch (e) {
+      console.log(e);
+      return sendServerError(res);
+    }
+};
+
