@@ -33,6 +33,7 @@ const userSchema = new mongoose.Schema({
   },
 },
 {
+  timestamps: true,
   toJSON: {
       transform: (doc, obj) => {
         obj.id = obj._id;
