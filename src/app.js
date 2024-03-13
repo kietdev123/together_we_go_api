@@ -38,9 +38,10 @@ app.use(Log);
 
 // import swagger
 const swaggerUi = require('swagger-ui-express');
-const fs = require("fs")
+const fs = require("fs");
+
 const YAML = require('yaml')
-const file  = fs.readFileSync('./src/swagger.yaml', 'utf8')
+const file  = fs.readFileSync( process.cwd() + '/src/swagger.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
