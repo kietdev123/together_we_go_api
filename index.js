@@ -1,5 +1,5 @@
 const http = require("http");
-const app = require("./app");
+const app = require("./src/app");
 const server = http.createServer(app);
 
 const { API_PORT } = process.env;
@@ -17,7 +17,7 @@ let io = require("socket.io")(server, {
   },
 });
 exports.io = io;
-require("./sockets/socket");
-require("./sockets/features/chat.feature");
-require("./controllers/message");
+require("./src/sockets/socket");
+require("./src/sockets/features/chat.feature");
+require("./src/controllers/message");
 
