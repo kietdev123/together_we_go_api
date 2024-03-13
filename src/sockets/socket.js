@@ -1,6 +1,6 @@
 const { chat_feature_init } = require("./features/chat.feature.js");
 const { calling_feature_init } = require("./features/calling.feature.js");
-const  {io}  = require("../../index.js");
+const  io  = require("../../index.js");
 const UserData = require('./data/user.js');
 const SocketIdData = require('./data/socket_id.data.js');
 const { userConnected, userDisconnected } = require("./function/socket.function.js");
