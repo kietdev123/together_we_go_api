@@ -26,11 +26,22 @@ const userSchema = new mongoose.Schema({
   locationId: { type: String, default: "" },
   locationMainText: { type: String, default: "" },
   locationAddress: { type: String, default: "" },
+  address: {
+    level1: { type: String, default: ""  },
+    level2: { type: String, default: ""  },
+    level3: { type: String, default: ""  },
+    level4: { type: String, default: ""  },
+  },
   role: { type: String, default: USER_ROLE.USER, enum : USER_ROLE },
   isCalling: {
     type: Boolean,
     default: false,
   },
+  booking: { type: mongoose.Schema.Types.ObjectId, ref: "booking" },
+  priorityPoint: {
+    type: Number,
+    default: 100,
+  }
 },
 {
   timestamps: true,
