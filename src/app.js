@@ -43,7 +43,8 @@ const fs = require("fs");
 const YAML = require('yaml')
 const file  = fs.readFileSync( process.cwd() + '/src/swagger.yaml', 'utf8')
 const swaggerDocument = YAML.parse(file)
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+const CSS_URL = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, { customCssUrl: CSS_URL }));
 
 const cors = require("cors");
 app.use(bodyParser.json());

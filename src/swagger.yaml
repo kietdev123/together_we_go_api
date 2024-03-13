@@ -5,7 +5,7 @@ info:
     email: skill1sp2@gmail.com
   version: 1.0.0
 servers:
-  - url: https://togerther-we-go-api.onrender.com/api
+  - url: https://together-we-go-api.vercel.app/api
   - url: http://localhost:8080/api
 tags:
   - name: auth
