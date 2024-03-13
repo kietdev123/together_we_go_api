@@ -20,7 +20,7 @@ const Booking = new mongoose.Schema({
     require: true,
   },
   time: {
-    type: String,
+    type: Date,
     require: true,
   },
   content: {
@@ -47,6 +47,12 @@ const Booking = new mongoose.Schema({
     type: String,
     require: true,
   },
+  startAddress: {
+    level1: { type: String, default: ""  },
+    level2: { type: String, default: ""  },
+    level3: { type: String, default: ""  },
+    level4: { type: String, default: ""  },
+  },
   endPointLat: {
     type: String,
     require: true,
@@ -66,6 +72,12 @@ const Booking = new mongoose.Schema({
   endPointAddress: {
     type: String,
     require: true,
+  },
+  endAddress: {
+    level1: { type: String, default: ""  },
+    level2: { type: String, default: ""  },
+    level3: { type: String, default: ""  },
+    level4: { type: String, default: ""  },
   },
   distance: {
     type: String,

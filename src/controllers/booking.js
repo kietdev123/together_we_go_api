@@ -1,15 +1,16 @@
 const Booking = require("../models/booking.js");
+const User = require("../models/user.js");
 const mongoose = require("mongoose");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-
-exports.create = (req, res) => {
+const {splitAddress} = require("../utils/utils.js");
+exports.create = async (req, res) => {
   try {
     const booking = new Booking({
       authorId: req.user.user_id,
       price: req.body.price,
       status: 'available',
       bookingType: req.body.bookingType,
-      time: req.body.time,
+      time: new Date(req.body.time),
       content: req.body.content,
       startPointLat: req.body.startPointLat,
       startPointLong: req.body.startPointLong,
@@ -24,12 +25,17 @@ exports.create = (req, res) => {
       endPointAddress: req.body.endPointAddress,
       duration: req.body.duration,
       distance: req.body.distance,
+      startAddress: splitAddress(req.body.startPointMainText, req.body.startPointAddress),
+      endAddress: splitAddress(req.body.endPointMainText, req.body.endPointAddress),
     });
     
     booking
       .save()
-      .then((result) => {
-          return sendSuccess(res,"Booking added succesfully", result);
+      .then(async (result) => {
+        await User.findByIdAndUpdate(req.user.user_id, {
+          booking: result.id,
+        });
+        return sendSuccess(res,"Booking added succesfully", result);
       })
       .catch((err) => {
         res.status(500).json({
@@ -99,7 +105,6 @@ exports.getMyList = async (req, res) => {
     if (skipNum < 0) skipNum = 0;
 
     filter.authorId = new mongoose.Types.ObjectId(req.user.user_id);
-    console.log(req.user.user_id);
 
     let _sort = {};
     if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
