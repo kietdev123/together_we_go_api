@@ -16,7 +16,9 @@ let io = require("socket.io")(server, {
     origin: "*",
   },
 });
-exports.io = io;
+module.exports = {
+  io
+}
 require("./src/sockets/socket");
 require("./src/sockets/features/chat.feature");
 require("./src/controllers/message");

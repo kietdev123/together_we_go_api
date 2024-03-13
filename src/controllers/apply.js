@@ -34,6 +34,12 @@ exports.create = async (req, res, next) => {
     });
 
     await data.save();
+    await Promise.all([
+      data.save(),
+      User.findByIdAndUpdate(req.user.user_id, {
+        booking : new mongoose.Types.ObjectId(req.body.booking),
+      }),
+    ]);
 
     data = await Apply
     .findById(data.id)
