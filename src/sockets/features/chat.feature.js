@@ -29,7 +29,7 @@ exports.chat_feature_init = (client) => {
 
 exports.sendMessage = async (message) => { 
   try {
-    const {io} = require('../../index.js');
+    const {io} = require('../../../index.js');
     // console.log('2',io);
 
     // console.log(message);

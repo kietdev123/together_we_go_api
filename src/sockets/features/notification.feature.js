@@ -1,4 +1,4 @@
-const {io} = require('../../index.js');
+const {io} = require('../../../index.js');
 const Notification = require('../../models/notification.js');
 const User = require('../../models/user.js');
 const UserData = require('../data/user.js');
