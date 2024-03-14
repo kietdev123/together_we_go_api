@@ -184,22 +184,17 @@ exports.refresh = async (req, res, next) => {
 exports.resetPassword = async (req, res, next) => {
   try {
     const { email, password, new_password } = req.body;
-
+console.log(req.body);
+console.log(email);
     // Validate if user exist in our database
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: email });
 
-    if (user && (await bcrypt.compare(password, user.password))) {
-      let encryptedPassword = await bcrypt.hash(new_password, 10);
-
-      user.password = encryptedPassword;
-      await user.save();
-   
-      return sendSuccess(res, "Reset password successfully");
-      
-    }
-    else {
-      return sendError(res, "Email hoặc mật khẩu không đúng.")
-    }
+    let encryptedPassword = await bcrypt.hash(new_password, 10);
+console.log(user);
+    user.password = encryptedPassword;
+    await user.save();
+ 
+    return sendSuccess(res, "Reset password successfully");
 
   } catch (err) {
     console.log(err);

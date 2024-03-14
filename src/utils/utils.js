@@ -1,6 +1,8 @@
 
 const splitAddress = (pointMainText, pointAddress) => {
-
+    pointAddress = stringToSlug(pointAddress)
+    pointMainText = stringToSlug(pointMainText)
+    
     let result = {
       'level1' : pointMainText
     }
@@ -21,7 +23,23 @@ const splitAddress = (pointMainText, pointAddress) => {
     return result;
 }
 
+const stringToSlug = (str) => {
+  if (str == null || str == undefined)  return "";
+  // remove accents
+  var from = "àáãảạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệđùúủũụưừứửữựòóỏõọôồốổỗộơờớởỡợìíỉĩịäëïîöüûñçýỳỹỵỷ",
+      to   = "aaaaaaaaaaaaaaaaaeeeeeeeeeeeduuuuuuuuuuuoooooooooooooooooiiiiiaeiiouuncyyyyy";
+  for (var i=0, l=from.length ; i < l ; i++) {
+    str = str.replace(RegExp(from[i], "gi"), to[i]);
+  }
 
+  str = str.toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9\-]/g, '-')
+        .replace(/-+/g, '-');
+
+  return str;
+}
 module.exports = {
   splitAddress,
+  stringToSlug
 }

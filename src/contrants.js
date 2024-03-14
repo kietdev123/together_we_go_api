@@ -36,3 +36,12 @@ module.exports.LOCATION_TYPE = {
     COMPANY : 'company',
     OTHER : 'other',
   };
+
+  module.exports.BOOKING_STATUS = {
+    'available' : 5,
+    "complete" : 4,
+    "block": 3,
+    "close": 2,
+    "cancel": 1,
+  };
+

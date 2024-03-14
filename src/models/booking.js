@@ -7,9 +7,14 @@ const Booking = new mongoose.Schema({
     require: true,
   },
   status: {
-    type: String,
+    type: Number,
     require: true, 
-    // complete,   available,   cancel,
+    // available, complete, block, close, cancel,
+    // 5 4 3 2 1
+    // available -> complete -> close
+    // available -> block
+    // available -> cancel
+ 
   },
   price: {
     type: Number,
@@ -87,6 +92,9 @@ const Booking = new mongoose.Schema({
     type: String,
     require: true,
   },
+  point: {
+    type: Number,
+  }
 },
 {
   timestamps: true,

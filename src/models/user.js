@@ -41,6 +41,17 @@ const userSchema = new mongoose.Schema({
   priorityPoint: {
     type: Number,
     default: 100,
+  },
+  addressArea: {
+    morning: {
+      type: String, default: "level3" // from 6 am to 12 am
+    },
+    afternoon:{
+      type: String, default: "level3" // from 12 am to 6 pm
+    },
+    night: {
+      type: String, default: "level4" // else
+    }
   }
 },
 {

@@ -5,7 +5,7 @@ const Notification = require("../models/notification.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const dataName = "booking";
 const { sendEvent } = require("../sockets/function/socket.function.js");
-const { APPLY_STATE } = require("../contrants.js");
+const { APPLY_STATE, BOOKING_STATUS } = require("../contrants.js");
 
 exports.create = async (req, res, next) => {
   try {
@@ -89,7 +89,7 @@ exports.update = async (req, res, next) => {
     });
 
     if (req.body.state == "close") {
-      await Booking.findByIdAndUpdate(data.booking.id, {status : 'complete'});
+      await Booking.findByIdAndUpdate(data.booking.id, {status : BOOKING_STATUS['complete']});
     }
     
     let text = data.booking.authorId.firstName;
