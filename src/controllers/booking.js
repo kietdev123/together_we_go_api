@@ -440,10 +440,22 @@ exports.getRecommend = async (req, res) => {
       return a.dis < b.dis;
     })
 
-    let bookings = bookingVectors;
+   
+    let bookingIds = bookingVectors.slice(0, 5).map((value) => {return value.booking;});
+    console.log(bookingIds);
+    let bookings = await Booking.find(
+      {'_id':{$in: bookingIds}},
+    ).populate("authorId");
 
-    return sendSuccess(res,"Get recommend bookings succesfully", bookings, bookings.length);
+    // return sendSuccess(res,"Get recommend bookings succesfully", bookings, bookings.length);
 
+    res.status(200).json({
+      success: true,
+      message: "Get recommend bookings succesfully",
+      distance: bookingVectors.slice(0, 5).map((value) => {return value.dis;}),
+      data: bookings,
+      total:  bookings.length,
+    })
   } catch (e) {
     console.log(e);
     return sendServerError(res);
