@@ -109,5 +109,11 @@ const Booking = new mongoose.Schema({
 }
 );
 
-
+Booking.index({
+  startPointMainText: 'text',
+  startPointAddress: 'text',
+  endPointMainText: 'text',
+  endPointAddress: 'text',
+  content: 'text',
+})
 module.exports = mongoose.model("booking", Booking);

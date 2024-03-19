@@ -54,13 +54,15 @@ exports.getList = async (req, res) => {
     let filter = [];
     let {
       page, pageSize, 
+      keyword,
       //sortCreatedAt, sortUpdatedAt, 
-      status, authorId, minPrice, maxPrice,
-      startAddress,
-      endAddress,
-      bookingType
+      status, authorId, 
+      minPrice, maxPrice,
+      startAddress, endAddress,
+      startTime, endTime,
+      bookingType,
     } = req.query;
-
+    console.log(req.query);
     startAddress = stringToSlug(startAddress)
     endAddress = stringToSlug(endAddress)
 
@@ -82,21 +84,38 @@ exports.getList = async (req, res) => {
     if (authorId != null && authorId != undefined && authorId != '') 
       filter.push({ 'authorId' : new mongoose.Types.ObjectId(authorId)});
     
-    if (minPrice != null && minPrice != undefined && minPrice != '') 
-       minPrice = Number(minPrice);
-    else  minPrice = 0;
-    if (maxPrice != null && maxPrice != undefined && maxPrice != '') 
-       maxPrice = Number(maxPrice);
-    else  maxPrice = 10000000;
+    let priceRange = {}
 
-    filter.push({'price' : { $gt :  minPrice, $lt : maxPrice}});
+    if (minPrice != null && minPrice != undefined && minPrice != '') {
+        minPrice = Number(minPrice);
+        priceRange["$gte"] = minPrice;
+    }
+       
+   
+    if (maxPrice != null && maxPrice != undefined && maxPrice != '') {
+      maxPrice = Number(maxPrice);
+      priceRange["$lte"] = maxPrice;
+    }
+      
+   
+    if ( Object.keys(priceRange).length > 0)
+       filter.push({'price' : priceRange});
 
 
+    if ( keyword != null &&  keyword != undefined &&  keyword != '') {
+        filter.push({
+          $text: {$search: keyword,  
+            $caseSensitive: false,
+            $diacriticSensitive: false}
+        })
+      } 
+      
     if ( startAddress != null &&  startAddress != undefined &&  startAddress != '') {
+
       filter.push({
         $or: [
-          {'startPointMainText' : { $regex: `/${startAddress}/`, $options: 'i' } },
-          {'startPointAddress' : { $regex: `/${startAddress}/`, $options: 'i' } },
+          {'startPointMainText' : { $regex: startAddress, $options: 'i' } },
+          {'startPointAddress' : { $regex: startAddress, $options: 'i' } },
         ]
       })
     } 
@@ -104,13 +123,26 @@ exports.getList = async (req, res) => {
     if ( endAddress != null &&  endAddress != undefined &&  endAddress != '') {
       filter.push({
         $or: [
-          {'endPointMainText' : { $regex: `/${endAddress}/`, $options: 'i' } },
-          {'endPointAddress' : { $regex: `/${endAddress}/`, $options: 'i' } },
+          {'endPointMainText' : { $regex: endAddress, $options: 'i' } },
+          {'endPointAddress' : { $regex: endAddress, $options: 'i' } },
         ]
       })
     } 
       
+    let timeRange = {}
 
+    if (startTime != null && startTime != undefined && startTime != '') {
+        timeRange["$gte"] = new Date(startTime);
+    }
+          
+    if (endTime != null && endTime != undefined && endTime != '') {
+      timeRange["$lte"] = new Date(endTime);
+    }
+       
+    console.log(timeRange);
+    if ( Object.keys(timeRange).length > 0)
+      filter.push({'createdAt' : timeRange});
+ 
     let _sort = {
       'status': -1,
       'point' : -1,
@@ -142,113 +174,113 @@ exports.getList = async (req, res) => {
       .limit(pageSize)
       .populate("authorId")
    
-    if (bookings.length == 0) {
-       // case-based knowledge-based recommender
+    // if (bookings.length == 0) {
+    //    // case-based knowledge-based recommender
        
-       if (user.booking != null && user.booking != undefined) {
-        filter = []
-         // find similiar with booking that user last notice
-        filter.push({
-          $or: [
-            {'startPointMainText' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
-            {'startPointAddress' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
+    //    if (user.booking != null && user.booking != undefined) {
+    //     filter = []
+    //      // find similiar with booking that user last notice
+    //     filter.push({
+    //       $or: [
+    //         {'startPointMainText' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
+    //         {'startPointAddress' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
 
-            {'startPointMainText' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
-            {'startPointAddress' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
+    //         {'startPointMainText' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
+    //         {'startPointAddress' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
 
-            {'endPointMainText' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
-            {'endPointAddress' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
+    //         {'endPointMainText' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
+    //         {'endPointAddress' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
 
-            {'endPointMainText' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
-            {'endPointAddress' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
-          ]
-        })
+    //         {'endPointMainText' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
+    //         {'endPointAddress' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
+    //       ]
+    //     })
 
-        if (filter.length == 0) filter = {};
-        else filter = {
-          $and: filter,
-        }
-        bookings = await Booking
-        .find(filter)
-        .sort(_sort)
-        .skip(skipNum)
-        .limit(pageSize)
-        .populate("authorId")
-      }
-    }
+    //     if (filter.length == 0) filter = {};
+    //     else filter = {
+    //       $and: filter,
+    //     }
+    //     bookings = await Booking
+    //     .find(filter)
+    //     .sort(_sort)
+    //     .skip(skipNum)
+    //     .limit(pageSize)
+    //     .populate("authorId")
+    //   }
+    // }
 
-    const local = new Date().toLocaleString("en-US", {timeZone: 'Asia/Bangkok'});
-    const currentHour = new Date(local).getHours();  
+    // const local = new Date().toLocaleString("en-US", {timeZone: 'Asia/Bangkok'});
+    // const currentHour = new Date(local).getHours();  
 
-    if (bookings.length == 0) {
-      // constraint-based knowledge-based recommender
-      filter = []
+    // if (bookings.length == 0) {
+    //   // constraint-based knowledge-based recommender
+    //   filter = []
 
-      let address = user.address.level4;  
-      if (currentHour >= 6 && currentHour <= 12) {
-        address = user.address[user.addressArea.morning];
-      }
-      else if (currentHour > 12 && currentHour <= 18) {
-        address = user.address[user.addressArea.afternoon];
-      }
-      else {
-        address = user.address[user.addressArea.night];
-      }
+    //   let address = user.address.level4;  
+    //   if (currentHour >= 6 && currentHour <= 12) {
+    //     address = user.address[user.addressArea.morning];
+    //   }
+    //   else if (currentHour > 12 && currentHour <= 18) {
+    //     address = user.address[user.addressArea.afternoon];
+    //   }
+    //   else {
+    //     address = user.address[user.addressArea.night];
+    //   }
 
-      filter.push({
-        $or: [
-          {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-          {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
+    //   filter.push({
+    //     $or: [
+    //       {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
 
-          {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-          {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
 
-          {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-          {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
 
-          {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-          {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
-        ]
-      })
-      if (filter.length == 0) filter = {};
-      else filter = {
-        $and: filter,
-      }
-      bookings = await Booking
-      .find(filter)
-      .sort(_sort)
-      .skip(skipNum)
-      .limit(pageSize)
-      .populate("authorId")
-    }
+    //       {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
+    //       {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
+    //     ]
+    //   })
+    //   if (filter.length == 0) filter = {};
+    //   else filter = {
+    //     $and: filter,
+    //   }
+    //   bookings = await Booking
+    //   .find(filter)
+    //   .sort(_sort)
+    //   .skip(skipNum)
+    //   .limit(pageSize)
+    //   .populate("authorId")
+    // }
     
-    // Critique Methods
-    let newLevel = "";
+    // // Critique Methods
+    // let newLevel = "";
 
-    if ( startAddress.includes(user.address.level4) || 
-      endAddress.includes(user.address.level4) ) newLevel = "level4"; 
+    // if ( startAddress.includes(user.address.level4) || 
+    //   endAddress.includes(user.address.level4) ) newLevel = "level4"; 
 
-    if ( startAddress.includes(user.address.level3) || 
-      endAddress.includes(user.address.level3) ) newLevel = "level3"; 
+    // if ( startAddress.includes(user.address.level3) || 
+    //   endAddress.includes(user.address.level3) ) newLevel = "level3"; 
 
-    if ( startAddress.includes(user.address.level2) || 
-      endAddress.includes(user.address.level2) ) newLevel = "level2";
+    // if ( startAddress.includes(user.address.level2) || 
+    //   endAddress.includes(user.address.level2) ) newLevel = "level2";
     
-    if ( startAddress.includes(user.address.level1) || 
-      endAddress.includes(user.address.level1) ) newLevel = "level1";
+    // if ( startAddress.includes(user.address.level1) || 
+    //   endAddress.includes(user.address.level1) ) newLevel = "level1";
       
-    if (newLevel != "") {
-      if (currentHour >= 6 && currentHour <= 12) {
-        user.addressArea.morning = newLevel;
-      }
-      else if (currentHour > 12 && currentHour <= 18) {
-        user.addressArea.afternoon = newLevel;
-      }
-      else {
-        user.addressArea.night = newLevel;
-      }
-      await user.save();
-    }
+    // if (newLevel != "") {
+    //   if (currentHour >= 6 && currentHour <= 12) {
+    //     user.addressArea.morning = newLevel;
+    //   }
+    //   else if (currentHour > 12 && currentHour <= 18) {
+    //     user.addressArea.afternoon = newLevel;
+    //   }
+    //   else {
+    //     user.addressArea.night = newLevel;
+    //   }
+    //   await user.save();
+    // }
     
 
     return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
