@@ -1,9 +1,13 @@
 const Booking = require("../models/booking.js");
+const BookingVector = require("../models/booking_vector.js");
 const User = require("../models/user.js");
 const mongoose = require("mongoose");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const {splitAddress, stringToSlug} = require("../utils/utils.js");
+const {splitAddress, stringToSlug,  geoHash,
+  timeDifference,
+  compareGeohashes,} = require("../utils/utils.js");
 const {BOOKING_STATUS} = require("../contrants.js");
+
 exports.create = async (req, res) => {
   try {
     let user = await User.findById(req.user.user_id);
@@ -16,14 +20,14 @@ exports.create = async (req, res) => {
       time: new Date(req.body.time),
       content: req.body.content,
       // startPoint
-      startPointLat: req.body.startPointLat,
-      startPointLong: req.body.startPointLong,
+      startPointLat: Number(req.body.startPointLat),
+      startPointLong: Number(req.body.startPointLong),
       startPointId: req.body.startPointId,
       startPointMainText: req.body.startPointMainText,
       startPointAddress: req.body.startPointAddress,
       // endPoint
-      endPointLat: req.body.endPointLat,
-      endPointLong: req.body.endPointLong,
+      endPointLat: Number(req.body.endPointLat),
+      endPointLong: Number(req.body.endPointLong),
       endPointLatLng: req.body.endPointLng,
       endPointId: req.body.endPointId,
       endPointMainText: req.body.endPointMainText,
@@ -38,9 +42,70 @@ exports.create = async (req, res) => {
     
     let result = await booking.save();
     user.booking = result.id;
-
-    await user.save();
+    
+    await Promise.all([
+      user.save(),
+      BookingVector.create({
+        startPointGeoHash : geoHash(Number(req.body.startPointLat),Number(req.body.startPointLong),),
+        endPointGeoHash : geoHash(Number(req.body.endPointLat),Number(req.body.endPointLong),),
+        "time" :  new Date(req.body.time),
+        booking: result.id,
+      })
+    ]);
+    
     return sendSuccess(res,"Booking added succesfully", result);
+
+  } catch (err) {
+    console.log(err);
+    return sendServerError(res);
+  }
+};
+
+exports.update = async (req, res) => {
+  try {
+    const {id} = req.params;
+    let booking = null;
+    await Promise.all([
+      Booking.findByIdAndUpdate(id, {
+        authorId: req.user.user_id,
+        price: req.body.price,
+        // status: req.body.status,
+        bookingType: req.body.bookingType,
+        time: new Date(req.body.time),
+        content: req.body.content,
+        // startPoint
+        startPointLat: Number(req.body.startPointLat),
+        startPointLong: Number(req.body.startPointLong),
+        startPointId: req.body.startPointId,
+        startPointMainText: req.body.startPointMainText,
+        startPointAddress: req.body.startPointAddress,
+        // endPoint
+        endPointLat: Number(req.body.endPointLat),
+        endPointLong: Number(req.body.endPointLong),
+        endPointLatLng: req.body.endPointLng,
+        endPointId: req.body.endPointId,
+        endPointMainText: req.body.endPointMainText,
+        endPointAddress: req.body.endPointAddress,
+        //
+        duration: req.body.duration,
+        distance: req.body.distance,
+        startAddress: splitAddress(req.body.startPointMainText, req.body.startPointAddress),
+        endAddress: splitAddress(req.body.endPointMainText, req.body.endPointAddress),
+        //point: user.priorityPoint
+      }).populate("authorId").then((value) => {
+        booking = value;
+      }),
+      BookingVector.findOneAndUpdate({
+        'booking': new mongoose.Types.ObjectId(id),
+      },{
+        startPointGeoHash : geoHash(Number(req.body.startPointLat),Number(req.body.startPointLong),),
+        endPointGeoHash : geoHash(Number(req.body.endPointLat),Number(req.body.endPointLong),),
+        "time" :  new Date(req.body.time),
+        // booking: result.id,
+      })
+     ]); 
+
+    return sendSuccess(res,"Booking update succesfully", booking);
 
   } catch (err) {
     console.log(err);
@@ -50,7 +115,7 @@ exports.create = async (req, res) => {
 
 exports.getList = async (req, res) => {
   try {
-    let user =  await User.findById(req.user.user_id).populate("booking")
+    
     let filter = [];
     let {
       page, pageSize, 
@@ -174,6 +239,7 @@ exports.getList = async (req, res) => {
       .limit(pageSize)
       .populate("authorId")
    
+    // let user =  await User.findById(req.user.user_id).populate("booking")
     // if (bookings.length == 0) {
     //    // case-based knowledge-based recommender
        
@@ -291,7 +357,6 @@ exports.getList = async (req, res) => {
   }
 };
 
-
 exports.getMyList = async (req, res) => {
   try {
     let filter = {};
@@ -336,6 +401,49 @@ exports.getOne = async (req, res) => {
     const {id} = req.params;
     const booking = await Booking.findById(id).populate("authorId");
     return sendSuccess(res, "Get 1 booking successfully", booking);
+  } catch (e) {
+    console.log(e);
+    return sendServerError(res);
+  }
+};
+
+exports.getRecommend = async (req, res) => {
+  try {
+    let input = {
+      // Đông Hòa Dĩ An, Bình Dương
+      startPointGeoHash : geoHash(Number(req.query.startPointLat),Number(req.query.startPointLong),),
+      endPointGeoHash : geoHash(Number(req.query.endPointLat),Number(req.query.endPointLong),),
+      "time" : new Date(req.query.time),
+    }
+
+    let bookingVectors = await BookingVector.find().lean();
+
+      // calculate distance between vectors
+    for (let i = 0; i < bookingVectors.length; i++) {
+      let startPointDis = compareGeohashes(input.startPointGeoHash,bookingVectors[i].startPointGeoHash );
+      
+      let endPointDis = compareGeohashes(input.endPointGeoHash, bookingVectors[i].endPointGeoHash);
+
+      let timeDis = timeDifference(input.time, bookingVectors[i].time);
+
+      // console.log(startPointDis, endPointDis, timeDis);
+
+      let dis = startPointDis * startPointDis + endPointDis * endPointDis + timeDis * timeDis;
+
+      dis = Math.sqrt(dis);
+
+      bookingVectors[i].dis = dis;
+    }
+
+
+    bookingVectors.sort(function compare(a, b) {
+      return a.dis < b.dis;
+    })
+
+    let bookings = bookingVectors;
+
+    return sendSuccess(res,"Get recommend bookings succesfully", bookings, bookings.length);
+
   } catch (e) {
     console.log(e);
     return sendServerError(res);

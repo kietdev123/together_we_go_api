@@ -1,3 +1,4 @@
+const { geocoordinateToGeohash } = require("geocoordinate-to-geohash");
 
 const splitAddress = (pointMainText, pointAddress) => {
     pointAddress = stringToSlug(pointAddress)
@@ -39,7 +40,41 @@ const stringToSlug = (str) => {
 
   return str;
 }
+
+const geoHash = (latitude,longitude, precision = 8 ) =>{
+  return geocoordinateToGeohash({
+    latitude,
+    longitude,
+    precision,
+  });
+}
+
+const timeDifference = (startTime, endTime) => {
+  const startDate = new Date(startTime);
+  const endDate = new Date(endTime);
+  const difference = Math.abs(endDate.getTime() - startDate.getTime());
+  return (difference / 1000 / 60);
+}
+
+const compareGeohashes = (geohash1, geohash2) => {
+  // Find the length of common prefix of two geohashes
+  var commonPrefixLength = 0;
+  for (var i = 0; i < Math.min(geohash1.length, geohash2.length); i++) {
+      if (geohash1[i] !== geohash2[i]) {
+          break;
+      }
+      commonPrefixLength++;
+  }
+
+  // Calculate similarity percentage
+  var similarityPercentage = (commonPrefixLength / geohash1.length) * 100;
+
+  return similarityPercentage;
+}
 module.exports = {
   splitAddress,
-  stringToSlug
+  stringToSlug,
+  geoHash,
+  timeDifference,
+  compareGeohashes,
 }

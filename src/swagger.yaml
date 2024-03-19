@@ -236,6 +236,64 @@ paths:
           description: Server internal error
       security:
         - api_key: []
+  /booking/recommend:
+    get:
+      summary: get bookings recommend
+      tags:
+        - booking
+      parameters:
+        - in: query
+          name: startPointLat
+          schema:
+            type: number
+            default: 10.876927
+        - in: query
+          name: startPointLong
+          schema:
+            type: number
+            default: 106.807782
+        - in: query
+          name: endPointLat
+          schema:
+            type: number
+            default: 10.876927
+        - in: query
+          name: endPointLong
+          schema:
+            type: number
+            default: 106.807782
+        - in: query
+          name: time
+          schema:
+            type: string
+            default: "2023-03-14T04:27:41.000+00:00"
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  total:
+                    type: integer
+                    example: 1
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
   /booking:
     post:
       summary: create booking
@@ -365,6 +423,46 @@ paths:
       security:
         - api_key: []
   /booking/{id}:
+    put:
+      summary: update booking
+      tags:
+        - booking
+      parameters:
+        - name: id
+          in: path
+          description: objectId of booking
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Booking_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
     get:
       summary: get 1 booking
       tags:
@@ -1744,64 +1842,55 @@ components:
     Booking_post:
       type: object
       properties:
-        status:
-          type: string
-          example: "string"
         price:
           type: integer
           format: int64
-          example: 198772
+          example: 60000
         bookingType:
           type: string
-          example: "string"
+          example: "Tìm tài xế"
         content:
           type: string
-          example: "string"
+          example: "go to school"
         time:
           type: string
-          example: "string"
+          example: "2023-03-15T04:27:41.000+00:00"
         startPointLat:
-          type: string
-          example: "string"
+          type: int32
+          example: 10.762622
         startPointLong:
-          type: string
-          example: "string"
+          type: int32
+          example: 106.660172
         startPointId:
           type: string
           example: "string"
         startPointMainText:
           type: string
-          example: "string"
+          example: Ho Chi Minh City, Vietnam
         startPointAddress:
           type: string
-          example: "string"
+          example: Ho Chi Minh City, Vietnam
         endPointLat:
-          type: string
-          example: "string"
+          type: int32
+          example: 11.375031
         endPointLong:
-          type: string
-          example: "string"
+          type: int32
+          example: 106.131363
         endPointId:
           type: string
           example: "string"
         endPointMainText:
           type: string
-          example: "string"
+          example: Tay Ninh, Tay Ninh province, Vietnam
         endPointAddress:
           type: string
-          example: "string"
+          example: Tay Ninh, Tay Ninh province, Vietnam
         distance:
           type: string
-          example: "string"
+          example: "1.41 km"
         duration:
           type: string
-          example: "string"
-        createdAt:
-          type: string
-          example: "string"
-        updatedAt:
-          type: string
-          example: "string"
+          example: "2.46 phút"
       xml:
         name: booking
     Booking_get:
