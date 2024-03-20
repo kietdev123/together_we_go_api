@@ -38,8 +38,7 @@ module.exports.LOCATION_TYPE = {
   };
 
   module.exports.BOOKING_STATUS = {
-    'available' : 3,
-    "complete" : 2,
-    "block": 1,
+    'available' : 2,
+    "complete" : 1,
   };
 
