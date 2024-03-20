@@ -52,7 +52,11 @@ const userSchema = new mongoose.Schema({
     night: {
       type: String, default: "level4" // else
     }
-  }
+  },
+  isBlock: {
+    type: Boolean,
+    default: false,
+  },
 },
 {
   timestamps: true,
