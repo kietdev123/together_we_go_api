@@ -9,12 +9,10 @@ const Booking = new mongoose.Schema({
   status: {
     type: Number,
     require: true, 
-    // available, complete, block, close, cancel,
-    // 5 4 3 2 1
-    // available -> complete -> close
+    // available, complete, block
+    // 3 2 1
+    // available -> complete
     // available -> block
-    // available -> cancel
- 
   },
   price: {
     type: Number,
