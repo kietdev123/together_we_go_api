@@ -11,7 +11,6 @@ const Booking = new mongoose.Schema({
     require: true, 
     // available, complete
     // 2 1
-    // available -> complete
   },
   price: {
     type: Number,
