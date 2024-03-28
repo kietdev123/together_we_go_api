@@ -1,4 +1,15 @@
 const User = require("../../models/user");
+const Booking = require("../../models/booking");
+const Review = require("../../models/review");
+const Notification = require("../../models/notification.js");
+const Message = require("../../models/message.js");
+const LocationSaved = require("../../models/location_saved.js");
+const LocationHistorySearched = require("../../models/location_history_search");
+const ChatRoom = require("../../models/chat_room");
+const BookingSaved = require("../../models/booking_saved");
+const BookingVector = require("../../models/booking_vector");
+const Apply = require("../../models/apply");
+
 const { sendSuccess, sendError, sendServerError} = require("../../utils/client.js");
 const dataName = "user";
 const bcrypt = require("bcryptjs");
@@ -113,8 +124,8 @@ exports.update = async (req, res, next) => {
     console.log(req.body);
     if (req.body.date) req.body.birthDate = new Date(req.body.date);
     if (req.body.password != undefined && req.body.password != null) {
-      let encryptedPassword = await bcrypt.hash(res.body.password, 10);
-      res.body.password = encryptedPassword;
+      let encryptedPassword = await bcrypt.hash(req.body.password, 10);
+      req.body.password = encryptedPassword;
     }
     const data = await User.findByIdAndUpdate(req.params.id, req.body, {new : true})
     return sendSuccess(res, `Update 1 ${dataName} successfully`, data);
@@ -127,6 +138,37 @@ exports.update = async (req, res, next) => {
 exports.delete = async (req, res, next) => {
   try {
     const data = await User.findByIdAndRemove(req.params.id);
+
+    const bookings = await Booking.find({'authorId' : req.params.id}).lean();
+    const bookingIds = bookings.map((booking) => booking._id);
+    console.log(bookingIds);
+
+    await Promise.all([
+      Review.deleteMany(
+        { $or : [{"creater" : req.params.id},
+        {"receiver" : req.params.id}, 
+      ]}),
+      Notification.deleteMany(
+        { $or : [{"author" : req.params.id},
+        {"receiver" : req.params.id}, 
+      ]}),
+      Message.deleteMany({"userId" : req.params.id}),
+      LocationSaved.deleteMany({"user" : req.params.id},),
+      LocationHistorySearched.deleteMany({"user" : req.params.id},),
+      ChatRoom.deleteMany(
+        { $or : [{"user1" : req.params.id},
+        {"user2" : req.params.id}, 
+      ]}),
+      BookingSaved.deleteMany({'booking':{'$in':bookingIds}}),
+      BookingVector.deleteMany({'booking':{'$in':bookingIds}}),
+      Apply.deleteMany({
+        $or: [
+          {'booking':{'$in':bookingIds}},
+          { 'applyer' : req.params.id}
+        ], 
+      }),
+      Booking.deleteMany({'_id':{'$in':bookingIds}}),
+    ]);
  
     return sendSuccess(res, `Delete 1 ${dataName} successfully`, data);
   } catch (err) {
