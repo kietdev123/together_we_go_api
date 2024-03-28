@@ -58,6 +58,10 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email });
 
     if (user && (await bcrypt.compare(password, user.password))) {
+
+      if (user.isBlock) {
+        return sendError(res, "Tài khoản đã bị khóa")
+      }
       // Create token
       const access_token = jwt.sign(
         { user_id: user.id, role : user.role, email : user.email },

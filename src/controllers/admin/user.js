@@ -1,17 +1,18 @@
 const User = require("../../models/user");
 const { sendSuccess, sendError, sendServerError} = require("../../utils/client.js");
 const dataName = "user";
+const bcrypt = require("bcryptjs");
 
 exports.create = async (req, res, next) => {
     // Our register logic starts here
     try {
       // Get user input
-      const { firstName, lastName, email, password } = req.body;
-  
+      const { name, email, password, date, age, gender, phoneNumber } = req.body;
+      console.log(req.body);
       // Validate user input
-      if (!(email && password && firstName)) {
-        return sendError(res, "Tất cả các thông tin đều bắt buộc.")
-      }
+      // if (!(email && password && name)) {
+      //   return sendError(res, "Tất cả các thông tin đều bắt buộc.")
+      // }
   
       // check if user already exist
       // Validate if user exist in our database
@@ -20,16 +21,20 @@ exports.create = async (req, res, next) => {
       if (oldUser) {
         return sendError(res, "Email này đã có")
       }
-  
+      
+      console.log(password);
       //Encrypt user password
-      encryptedPassword = await bcrypt.hash(password, 10);
+      let encryptedPassword = await bcrypt.hash(password, 10);
   
       // Create user in our database
       const user = await User.create({
-        firstName,
-        lastName,
-        email: email.toLowerCase(), // sanitize: convert email to lowercase
-        password: encryptedPassword,
+        'firstName' : name,
+        'email': email.toLowerCase(), // sanitize: convert email to lowercase
+        'password': encryptedPassword,
+        'birthDate': new Date(date),
+        'gender': gender,
+        'age': Number(age),
+        'phoneNumber' : phoneNumber,
         // Add default avatar
         avatarUrl:
           "https://res.cloudinary.com/dxoblxypq/image/upload/v1679984586/9843c460ff72ee89d791bffe667e451c_rzalqh.jpg",
@@ -105,6 +110,12 @@ exports.getOne = async (req, res) => {
 
 exports.update = async (req, res, next) => {
   try {
+    console.log(req.body);
+    if (req.body.date) req.body.birthDate = new Date(req.body.date);
+    if (req.body.password != undefined && req.body.password != null) {
+      let encryptedPassword = await bcrypt.hash(res.body.password, 10);
+      res.body.password = encryptedPassword;
+    }
     const data = await User.findByIdAndUpdate(req.params.id, req.body, {new : true})
     return sendSuccess(res, `Update 1 ${dataName} successfully`, data);
   } catch (err) {

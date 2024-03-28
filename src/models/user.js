@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   time: { type: Date },
-  birthDate: { type: String },
+  birthDate: { type: Date },
   gender: { type: String, default: "male", enum : USER_GENDER }, // "male" or "female"
   locationId: { type: String, default: "" },
   locationMainText: { type: String, default: "" },
@@ -57,6 +57,7 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  age: { type: Number, default: 20},
 },
 {
   timestamps: true,
