@@ -1,5 +1,8 @@
 const Booking = require("../models/booking.js");
 const BookingVector = require("../models/booking_vector.js");
+const BookingSaved =  require("../models/booking_saved.js");
+const Apply = require("../models/apply.js");
+const Review = require("../models/review.js");
 const User = require("../models/user.js");
 const mongoose = require("mongoose");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
@@ -65,7 +68,7 @@ exports.update = async (req, res) => {
   try {
     const {id} = req.params;
     let booking = null;
-    await Promise.all([
+        await Promise.all([
       Booking.findByIdAndUpdate(id, {
         authorId: req.user.user_id,
         price: req.body.price,
@@ -127,7 +130,7 @@ exports.getList = async (req, res) => {
       startTime, endTime,
       bookingType,
     } = req.query;
-    console.log(req.query);
+
     startAddress = stringToSlug(startAddress)
     endAddress = stringToSlug(endAddress)
 
@@ -456,6 +459,29 @@ exports.getRecommend = async (req, res) => {
       data: bookings,
       total:  bookings.length,
     })
+  } catch (e) {
+    console.log(e);
+    return sendServerError(res);
+  }
+};
+
+
+exports.delete = async (req, res) => {
+  try {
+    const {id} = req.params;
+
+    const applys = await Apply.find({'booking' : id}).lean();
+    const applyIds = applys.map((apply) => apply._id);
+
+    await Promise.all([
+      Booking.findByIdAndDelete(id),
+      BookingVector.findOneAndDelete({booking: id}),
+      BookingSaved.deleteMany({booking: id}),
+      Apply.deleteMany({'_id':{'$in':applyIds}}),
+      Review.deleteMany({'apply':{'$in':applyIds}}),
+    ]);
+    await Booking.findByIdAndDelete(id);
+    return sendSuccess(res, "Delete 1 booking successfully");
   } catch (e) {
     console.log(e);
     return sendServerError(res);
