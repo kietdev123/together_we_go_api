@@ -90,7 +90,17 @@ const Booking = new mongoose.Schema({
   },
   point: {
     type: Number,
-  }
+  },
+  // save user object id
+  userFavorites : {
+    type: [String], 
+    unique: true,
+  },
+  //save user object id
+  userMayFavorites : {
+    type: [String],
+    unique: true,
+  },
 },
 {
   timestamps: true,

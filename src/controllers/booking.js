@@ -1,6 +1,5 @@
 const Booking = require("../models/booking.js");
 const BookingVector = require("../models/booking_vector.js");
-const BookingSaved =  require("../models/booking_saved.js");
 const Apply = require("../models/apply.js");
 const Review = require("../models/review.js");
 const User = require("../models/user.js");
@@ -129,8 +128,12 @@ exports.getList = async (req, res) => {
       startAddress, endAddress,
       startTime, endTime,
       bookingType,
+      isFavorite,
+      isMayFavorite,
+      isMine,
+      id,
     } = req.query;
-
+    console.log(req.query);
     startAddress = stringToSlug(startAddress)
     endAddress = stringToSlug(endAddress)
 
@@ -144,7 +147,27 @@ exports.getList = async (req, res) => {
 
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
-
+    
+    if (id != null && id != undefined && id != '') 
+      filter.push({  "_id": new mongoose.Types.ObjectId(id) });
+    if (isFavorite != null && isFavorite != undefined && isFavorite != '') 
+      filter.push({ 'isFavorite' : isFavorite === 'true'});
+    if (isMayFavorite != null && isMayFavorite != undefined && isMayFavorite != '') 
+      filter.push({ 'isMayFavorite' : isMayFavorite === 'true'});
+    if (isMine != null && isMine != undefined && isMine != ''){
+      if (isMine === 'true') {
+        filter.push({
+          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
+        })
+      }
+      else {
+        filter.push({
+          $nor: [{
+          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
+        }]})
+      }
+    }
+      
     if (bookingType != null && bookingType != undefined && bookingType != '') 
       filter.push({ 'bookingType' : bookingType});
     if (status != null && status != undefined && status != '') 
@@ -207,7 +230,7 @@ exports.getList = async (req, res) => {
       timeRange["$lte"] = new Date(endTime);
     }
        
-    console.log(timeRange);
+
     if ( Object.keys(timeRange).length > 0)
       filter.push({'createdAt' : timeRange});
  
@@ -223,24 +246,46 @@ exports.getList = async (req, res) => {
     // if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
     //    _sort.updatedAt = Number(sortUpdatedAt);
 
-    // get my list
-    if (req.body.type == 'my') {
-      filter.push({
-        'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
-      })
-    }
+    console.log(filter);
 
     if (filter.length == 0) filter = {};
     else filter = {
       $and: filter,
     }
 
-    let bookings = await Booking
-      .find(filter)
-      .sort(_sort)
-      .skip(skipNum)
-      .limit(pageSize)
-      .populate("authorId")
+    let bookings = await Booking.aggregate([
+      {
+        $addFields: {
+          isFavorite: {
+            $cond: { // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userFavorites"]}, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false // Set isHave to false otherwise
+            }
+          },
+          isMayFavorite: {
+            $cond: { // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userMayFavorites"]}, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false // Set isHave to false otherwise
+            }
+          }
+        }
+        
+      },
+    { $match: filter }, // Match documents based on the filter
+    { $sort: _sort }, // Sort the matched documents
+    { $skip: skipNum }, // Skip documents for pagination
+    { $limit: pageSize }, // Limit the number of documents per page
+    { $lookup: { // Populate the "authorId" field
+        from: "users", // Assuming "authors" is the collection name
+        localField: "authorId",
+        foreignField: "_id",
+        as: "authorId"
+      }
+    },
+    { $unwind: "$authorId" } // Deconstruct the "author" array
+  ]);
    
     // let user =  await User.findById(req.user.user_id).populate("booking")
     // if (bookings.length == 0) {
@@ -360,56 +405,6 @@ exports.getList = async (req, res) => {
   }
 };
 
-exports.getMyList = async (req, res) => {
-  try {
-    let filter = {};
-    let {page, pageSize, sortCreatedAt, sortUpdatedAt, status, authorId} = req.query;
-    let skipNum = 0;
-
-    if (page) page = Number(page);
-    else page = 1
-
-    if (pageSize) pageSize = Number(pageSize);
-    else pageSize = 20;
-
-    skipNum = (page - 1) * pageSize;
-    if (skipNum < 0) skipNum = 0;
-
-    filter.authorId = new mongoose.Types.ObjectId(req.user.user_id);
-
-    let _sort = {};
-    if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
-       _sort.createdAt = Number(sortCreatedAt);
-
-    if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
-       _sort.updatedAt = Number(sortUpdatedAt);
-
-    const bookings = await Booking
-    .find(filter)
-    .sort(_sort)
-    .skip(skipNum)
-    .limit(pageSize)
-    .populate("authorId")
-    
-    return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
-
-  } catch (e) {
-    console.log(e);
-    return sendServerError(res);
-  }
-};
-
-exports.getOne = async (req, res) => {
-  try {
-    const {id} = req.params;
-    const booking = await Booking.findById(id).populate("authorId");
-    return sendSuccess(res, "Get 1 booking successfully", booking);
-  } catch (e) {
-    console.log(e);
-    return sendServerError(res);
-  }
-};
-
 exports.getRecommend = async (req, res) => {
   try {
     let input = {
@@ -476,7 +471,6 @@ exports.delete = async (req, res) => {
     await Promise.all([
       Booking.findByIdAndDelete(id),
       BookingVector.findOneAndDelete({booking: id}),
-      BookingSaved.deleteMany({booking: id}),
       Apply.deleteMany({'_id':{'$in':applyIds}}),
       Review.deleteMany({'apply':{'$in':applyIds}}),
     ]);
