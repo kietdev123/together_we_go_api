@@ -102,6 +102,8 @@ exports.getList = async (req, res) => {
   try {
     
     let filter = [];
+    filter.push({  isReal: true });
+    
     let {
       page, pageSize, 
       keyword,
@@ -154,7 +156,7 @@ exports.getList = async (req, res) => {
     if (bookingType != null && bookingType != undefined && bookingType != '') 
       filter.push({ 'bookingType' : bookingType});
     if (status != null && status != undefined && status != '') 
-      filter.push({ 'status' : status});
+      filter.push({ 'status' : Number(status)});
     if (authorId != null && authorId != undefined && authorId != '') 
       filter.push({ 'authorId' : new mongoose.Types.ObjectId(authorId)});
     
