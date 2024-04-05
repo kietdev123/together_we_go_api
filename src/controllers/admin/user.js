@@ -6,7 +6,6 @@ const Message = require("../../models/message.js");
 const LocationSaved = require("../../models/location_saved.js");
 const LocationHistorySearched = require("../../models/location_history_search");
 const ChatRoom = require("../../models/chat_room");
-const BookingVector = require("../../models/booking_vector");
 const Apply = require("../../models/apply");
 
 const { sendSuccess, sendError, sendServerError} = require("../../utils/client.js");
@@ -158,7 +157,6 @@ exports.delete = async (req, res, next) => {
         { $or : [{"user1" : req.params.id},
         {"user2" : req.params.id}, 
       ]}),
-      BookingVector.deleteMany({'booking':{'$in':bookingIds}}),
       Apply.deleteMany({
         $or: [
           {'booking':{'$in':bookingIds}},

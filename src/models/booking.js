@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const userSchema = require("./user.js");
+const { BOOKING_STATUS } = require("../contrants.js");
 const Booking = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -8,7 +9,7 @@ const Booking = new mongoose.Schema({
   },
   status: {
     type: Number,
-    require: true, 
+    default: BOOKING_STATUS.available,
     // available, complete
     // 2 1
   },
@@ -26,7 +27,7 @@ const Booking = new mongoose.Schema({
   },
   content: {
     type: String,
-    require: true,
+    default: ""
   },
   startPointLat: {
     type: Number,
@@ -38,7 +39,7 @@ const Booking = new mongoose.Schema({
   },
   startPointId: {
     type: String,
-    require: true,
+    default: ""
   },
   startPointMainText: {
     type: String,
@@ -47,12 +48,6 @@ const Booking = new mongoose.Schema({
   startPointAddress: {
     type: String,
     require: true,
-  },
-  startAddress: {
-    level1: { type: String, default: ""  },
-    level2: { type: String, default: ""  },
-    level3: { type: String, default: ""  },
-    level4: { type: String, default: ""  },
   },
   endPointLat: {
     type: Number,
@@ -64,7 +59,7 @@ const Booking = new mongoose.Schema({
   },
   endPointId: {
     type: String,
-    require: true,
+    default: ""
   },
   endPointMainText: {
     type: String,
@@ -74,19 +69,13 @@ const Booking = new mongoose.Schema({
     type: String,
     require: true,
   },
-  endAddress: {
-    level1: { type: String, default: ""  },
-    level2: { type: String, default: ""  },
-    level3: { type: String, default: ""  },
-    level4: { type: String, default: ""  },
-  },
   distance: {
     type: String,
-    require: true,
+    default: "",
   },
   duration: {
     type: String,
-    require: true,
+    default: ""
   },
   point: {
     type: Number,
@@ -95,12 +84,46 @@ const Booking = new mongoose.Schema({
   userFavorites : {
     type: [String], 
     unique: true,
+    index:true
   },
   //save user object id
   userMayFavorites : {
     type: [String],
     unique: true,
+    index:true
   },
+  applyNum: {
+    type: Number,
+  }, 
+  watchedNum: {
+    type: Number,
+  }, 
+  savedNum: {
+    type: Number,
+  },
+  diftAtribute: {
+    type: Number,
+  },
+  isNew: {
+    type: Boolean,
+    default: true,
+  },
+  interesestValue: {
+    type: Number,
+    default: 0,
+  },
+  interesestConfidenceValue: {
+    type: Number,
+    default: 0,
+  },
+  isReal: {
+    type: Boolean,
+    default: false,
+  },
+  isCaseBased: {
+    type: Boolean,
+    default: false,
+  }
 },
 {
   timestamps: true,

@@ -68,6 +68,8 @@ function getRandomDate(from, to) {
     return new Date(fromTime + Math.random() * (toTime - fromTime));
 }
 
+const randomFloat = (min, max) => Math.random() * (max - min) + min;
+
 async function main() {
     console.log('Doing....');
     let rows = await readXlsxFile(process.cwd() + '/src/service/recommed_system/data/address_data.xlsx');
@@ -82,7 +84,7 @@ async function main() {
     let numAddress = listAddress.length
 
     let bookings = [];
-    let num_gen_bookings = 1000;
+    let num_gen_bookings = 100000;
 
     for (let i = 1; i <= num_gen_bookings; i++) {
         let startIndex = generateRandom(0, numAddress);
@@ -98,38 +100,44 @@ async function main() {
 
         let distance = haversine(startAddress[2], startAddress[3], endAddress[2], endAddress[3]);
 
-        let type = generateRandom(0, 2) == 0 ? 'Có xe' : 'Cần đi chung';
+        let type = generateRandom(0, 2) == 0 ? 'Tìm tài xế' : 'Tìm hành khách';
 
         let time = generateRandomDOB();
         // from grabbike
         let priceArg = tinhGiaCuoc(distance)
         let price = generateRandom(priceArg - 5000, priceArg + 5000);
-        let applyNum = 0, watchedNum = 0, savedNum = 0;
+        let applyNum = 0, watchedNum = 0, savedNum = 0, point = 0, diftAtribute ;
+        point = generateRandom(0, 100)
 
-        // những giá thấp thì có nhiều tương tác
-        if (price < priceArg) {
+        // những giá cao thì có ít tương tác
+        if (price > priceArg || point < 50) {
             applyNum = generateRandom(0, 10);
-            watchedNum = generateRandom(0, 10)
-            savedNum = generateRandom(0, 10)
+            watchedNum = generateRandom(0, 10);
+            savedNum = generateRandom(0, 10);
+            diftAtribute = randomFloat(0.1,0.49)
         }
         else {
             applyNum = generateRandom(10, 20);
             watchedNum = generateRandom(10, 20)
             savedNum = generateRandom(10, 10)
+            diftAtribute = randomFloat(0.5,0.99)
         }
+
         bookings.push({
-            startMainText: startAddress[0],
-            startAddress: startAddress[1],
-            start_lat: startAddress[2],
-            start_long: startAddress[3],
-            endMainText: endAddress[0],
-            endtAddress: endAddress[1],
-            end_lat: endAddress[2],
-            end_lon: endAddress[3],
+            startPointMainText: startAddress[0],
+            startPointAddress: startAddress[1],
+            startPointLat: startAddress[2],
+            startPointLong: startAddress[3],
+            endPointMainText: endAddress[0],
+            endPointAddress: endAddress[1],
+            endPointLat: endAddress[2],
+            endPointLong: endAddress[3],
             'distance' : distance.toString(),
-            type,
+            bookingType: type,
             price,
             applyNum, watchedNum, savedNum, time,
+            point,
+            diftAtribute,
         })
     }
 

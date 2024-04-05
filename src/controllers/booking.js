@@ -1,5 +1,4 @@
 const Booking = require("../models/booking.js");
-const BookingVector = require("../models/booking_vector.js");
 const Apply = require("../models/apply.js");
 const Review = require("../models/review.js");
 const User = require("../models/user.js");
@@ -37,9 +36,9 @@ exports.create = async (req, res) => {
       //
       duration: req.body.duration,
       distance: req.body.distance,
-      startAddress: splitAddress(req.body.startPointMainText, req.body.startPointAddress),
-      endAddress: splitAddress(req.body.endPointMainText, req.body.endPointAddress),
-      point: user.priorityPoint
+      point: user.priorityPoint,
+      isReal: true,
+      isCaseBased: false,
     });
     
     let result = await booking.save();
@@ -47,12 +46,6 @@ exports.create = async (req, res) => {
     
     await Promise.all([
       user.save(),
-      BookingVector.create({
-        startPointGeoHash : geoHash(Number(req.body.startPointLat),Number(req.body.startPointLong),),
-        endPointGeoHash : geoHash(Number(req.body.endPointLat),Number(req.body.endPointLong),),
-        "time" :  new Date(req.body.time),
-        booking: result.id,
-      })
     ]);
     
     return sendSuccess(res,"Booking added succesfully", result);
@@ -91,20 +84,10 @@ exports.update = async (req, res) => {
         //
         duration: req.body.duration,
         distance: req.body.distance,
-        startAddress: splitAddress(req.body.startPointMainText, req.body.startPointAddress),
-        endAddress: splitAddress(req.body.endPointMainText, req.body.endPointAddress),
         //point: user.priorityPoint
       }).populate("authorId").then((value) => {
         booking = value;
       }),
-      BookingVector.findOneAndUpdate({
-        'booking': new mongoose.Types.ObjectId(id),
-      },{
-        startPointGeoHash : geoHash(Number(req.body.startPointLat),Number(req.body.startPointLong),),
-        endPointGeoHash : geoHash(Number(req.body.endPointLat),Number(req.body.endPointLong),),
-        "time" :  new Date(req.body.time),
-        // booking: result.id,
-      })
      ]); 
 
     return sendSuccess(res,"Booking update succesfully", booking);
@@ -286,116 +269,7 @@ exports.getList = async (req, res) => {
     },
     { $unwind: "$authorId" } // Deconstruct the "author" array
   ]);
-   
-    // let user =  await User.findById(req.user.user_id).populate("booking")
-    // if (bookings.length == 0) {
-    //    // case-based knowledge-based recommender
-       
-    //    if (user.booking != null && user.booking != undefined) {
-    //     filter = []
-    //      // find similiar with booking that user last notice
-    //     filter.push({
-    //       $or: [
-    //         {'startPointMainText' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
-    //         {'startPointAddress' : { $regex: `/${user.booking.startAddress.level2}/`, $options: 'i' } },
-
-    //         {'startPointMainText' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
-    //         {'startPointAddress' : { $regex: `/${user.booking.startAddress.level3}/`, $options: 'i' } },
-
-    //         {'endPointMainText' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
-    //         {'endPointAddress' : { $regex: `/${user.booking.endAddress.level2}/`, $options: 'i' } },
-
-    //         {'endPointMainText' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
-    //         {'endPointAddress' : { $regex: `/${user.booking.endAddress.level3}/`, $options: 'i' } },
-    //       ]
-    //     })
-
-    //     if (filter.length == 0) filter = {};
-    //     else filter = {
-    //       $and: filter,
-    //     }
-    //     bookings = await Booking
-    //     .find(filter)
-    //     .sort(_sort)
-    //     .skip(skipNum)
-    //     .limit(pageSize)
-    //     .populate("authorId")
-    //   }
-    // }
-
-    // const local = new Date().toLocaleString("en-US", {timeZone: 'Asia/Bangkok'});
-    // const currentHour = new Date(local).getHours();  
-
-    // if (bookings.length == 0) {
-    //   // constraint-based knowledge-based recommender
-    //   filter = []
-
-    //   let address = user.address.level4;  
-    //   if (currentHour >= 6 && currentHour <= 12) {
-    //     address = user.address[user.addressArea.morning];
-    //   }
-    //   else if (currentHour > 12 && currentHour <= 18) {
-    //     address = user.address[user.addressArea.afternoon];
-    //   }
-    //   else {
-    //     address = user.address[user.addressArea.night];
-    //   }
-
-    //   filter.push({
-    //     $or: [
-    //       {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-    //       {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
-
-    //       {'startPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-    //       {'startPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
-
-    //       {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-    //       {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
-
-    //       {'endPointMainText' : { $regex: `/${address}/`, $options: 'i' } },
-    //       {'endPointAddress' : { $regex: `/${address}/`, $options: 'i' } },
-    //     ]
-    //   })
-    //   if (filter.length == 0) filter = {};
-    //   else filter = {
-    //     $and: filter,
-    //   }
-    //   bookings = await Booking
-    //   .find(filter)
-    //   .sort(_sort)
-    //   .skip(skipNum)
-    //   .limit(pageSize)
-    //   .populate("authorId")
-    // }
-    
-    // // Critique Methods
-    // let newLevel = "";
-
-    // if ( startAddress.includes(user.address.level4) || 
-    //   endAddress.includes(user.address.level4) ) newLevel = "level4"; 
-
-    // if ( startAddress.includes(user.address.level3) || 
-    //   endAddress.includes(user.address.level3) ) newLevel = "level3"; 
-
-    // if ( startAddress.includes(user.address.level2) || 
-    //   endAddress.includes(user.address.level2) ) newLevel = "level2";
-    
-    // if ( startAddress.includes(user.address.level1) || 
-    //   endAddress.includes(user.address.level1) ) newLevel = "level1";
-      
-    // if (newLevel != "") {
-    //   if (currentHour >= 6 && currentHour <= 12) {
-    //     user.addressArea.morning = newLevel;
-    //   }
-    //   else if (currentHour > 12 && currentHour <= 18) {
-    //     user.addressArea.afternoon = newLevel;
-    //   }
-    //   else {
-    //     user.addressArea.night = newLevel;
-    //   }
-    //   await user.save();
-    // }
-    
+  
 
     return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
 
@@ -407,59 +281,58 @@ exports.getList = async (req, res) => {
 
 exports.getRecommend = async (req, res) => {
   try {
-    let input = {
-      // Đông Hòa Dĩ An, Bình Dương
-      startPointGeoHash : geoHash(Number(req.query.startPointLat),Number(req.query.startPointLong),),
-      endPointGeoHash : geoHash(Number(req.query.endPointLat),Number(req.query.endPointLong),),
-      "time" : new Date(req.query.time),
-    }
+    // let input = {
+    //   // Đông Hòa Dĩ An, Bình Dương
+    //   startPointGeoHash : geoHash(Number(req.query.startPointLat),Number(req.query.startPointLong),),
+    //   endPointGeoHash : geoHash(Number(req.query.endPointLat),Number(req.query.endPointLong),),
+    //   "time" : new Date(req.query.time),
+    // }
 
-    let bookingVectors = await BookingVector.find().lean();
+    // let bookingVectors = await BookingVector.find().lean();
 
-      // calculate distance between vectors
-    for (let i = 0; i < bookingVectors.length; i++) {
-      let startPointDis = compareGeohashes(input.startPointGeoHash,bookingVectors[i].startPointGeoHash );
+    //   // calculate distance between vectors
+    // for (let i = 0; i < bookingVectors.length; i++) {
+    //   let startPointDis = compareGeohashes(input.startPointGeoHash,bookingVectors[i].startPointGeoHash );
       
-      let endPointDis = compareGeohashes(input.endPointGeoHash, bookingVectors[i].endPointGeoHash);
+    //   let endPointDis = compareGeohashes(input.endPointGeoHash, bookingVectors[i].endPointGeoHash);
 
-      let timeDis = timeDifference(input.time, bookingVectors[i].time);
+    //   let timeDis = timeDifference(input.time, bookingVectors[i].time);
 
-      // console.log(startPointDis, endPointDis, timeDis);
+    //   // console.log(startPointDis, endPointDis, timeDis);
 
-      let dis = startPointDis * startPointDis + endPointDis * endPointDis + timeDis * timeDis;
+    //   let dis = startPointDis * startPointDis + endPointDis * endPointDis + timeDis * timeDis;
 
-      dis = Math.sqrt(dis);
+    //   dis = Math.sqrt(dis);
 
-      bookingVectors[i].dis = dis;
-    }
+    //   bookingVectors[i].dis = dis;
+    // }
 
 
-    bookingVectors.sort(function compare(a, b) {
-      return a.dis < b.dis;
-    })
+    // bookingVectors.sort(function compare(a, b) {
+    //   return a.dis < b.dis;
+    // })
 
    
-    let bookingIds = bookingVectors.slice(0, 5).map((value) => {return value.booking;});
-    console.log(bookingIds);
-    let bookings = await Booking.find(
-      {'_id':{$in: bookingIds}},
-    ).populate("authorId");
+    // let bookingIds = bookingVectors.slice(0, 5).map((value) => {return value.booking;});
+    // console.log(bookingIds);
+    // let bookings = await Booking.find(
+    //   {'_id':{$in: bookingIds}},
+    // ).populate("authorId");
 
     // return sendSuccess(res,"Get recommend bookings succesfully", bookings, bookings.length);
 
     res.status(200).json({
       success: true,
       message: "Get recommend bookings succesfully",
-      distance: bookingVectors.slice(0, 5).map((value) => {return value.dis;}),
-      data: bookings,
-      total:  bookings.length,
+      // distance: bookingVectors.slice(0, 5).map((value) => {return value.dis;}),
+      // data: bookings,
+      // total:  bookings.length,
     })
   } catch (e) {
     console.log(e);
     return sendServerError(res);
   }
 };
-
 
 exports.delete = async (req, res) => {
   try {
@@ -470,7 +343,6 @@ exports.delete = async (req, res) => {
 
     await Promise.all([
       Booking.findByIdAndDelete(id),
-      BookingVector.findOneAndDelete({booking: id}),
       Apply.deleteMany({'_id':{'$in':applyIds}}),
       Review.deleteMany({'apply':{'$in':applyIds}}),
     ]);
