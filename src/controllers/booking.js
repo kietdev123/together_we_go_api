@@ -8,7 +8,7 @@ const {splitAddress, stringToSlug,  geoHash,
   timeDifference,
   compareGeohashes,} = require("../utils/utils.js");
 const {BOOKING_STATUS} = require("../contrants.js");
-const {recommedBookings} = require("../service/recommed_system/recommend_system.js")
+const {recommedBookings, calculateICVForNewItem, updateCaseBaseSolution, saveNewCaseBase} = require("../service/recommed_system/recommend_system.js")
 
 exports.create = async (req, res) => {
   try {
@@ -47,6 +47,7 @@ exports.create = async (req, res) => {
     
     await Promise.all([
       user.save(),
+      calculateICVForNewItem(booking),
     ]);
     
     return sendSuccess(res,"Booking added succesfully", result);
@@ -92,6 +93,50 @@ exports.update = async (req, res) => {
      ]); 
 
     return sendSuccess(res,"Booking update succesfully", booking);
+
+  } catch (err) {
+    console.log(err);
+    return sendServerError(res);
+  }
+};
+
+exports.updateSome = async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {applyNum, watchedNum, savedNum, ...data} = req.body;
+    let value = {};
+    let check = false;
+
+    if (applyNum != null && applyNum != undefined && applyNum != ''){
+      check = true;
+      value.applyNum = 1; 
+    }
+    
+    if (watchedNum != null && watchedNum != undefined && watchedNum != '') {
+      check = true;
+      value.watchedNum = 1 
+    }
+     
+    if (savedNum != null && savedNum != undefined && savedNum != '') {
+      check = true;
+      value.savedNum = 1;
+    }
+    
+    if (check == true) value = { $inc: value }
+    let booking = await  Booking.findByIdAndUpdate(id, value ).lean();
+
+    if (booking.isCaseBased == true){
+      if (check == true) {
+        //love
+        await updateCaseBaseSolution(id, 'applyNum');
+      }
+      // hate
+    }
+    else {
+      if (booking.applyNum >= 10 && booking.watchedNum >= 10 && booking.savedNum >= 10)
+      saveNewCaseBase(id);
+    }
+    return sendSuccess(res,"Booking update succesfully");
 
   } catch (err) {
     console.log(err);

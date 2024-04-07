@@ -14,6 +14,7 @@ router.delete("/saved/:id", bookingSavedController.delete);
 
 router.get("/recommend", bookingController.getRecommend);
 router.put("/:id", bookingController.update);
+router.patch("/:id", bookingController.updateSome);
 router.delete("/:id", bookingController.delete);
 router.get("/", bookingController.getList);
 router.post("/", bookingController.create);

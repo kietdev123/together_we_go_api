@@ -182,25 +182,27 @@ paths:
         - booking
       parameters:
         - in: query
+          description: example Đại học Quốc gia Thành phố Hồ Chí Minh (Thành phố Thủ Đức, Thành phố Hồ Chí Minh và Thành phố Dĩ An, tỉnh Bình Dương, Việt Nam)
           name: startPointLat
           schema:
             type: number
-            default: 10.876927
+            default: 10.8686
         - in: query
           name: startPointLong
           schema:
             type: number
-            default: 106.807782
+            default: 106.7964
         - in: query
+          description: example Trường Đại học Công nghiệp TP.HCM (12 Nguyễn Văn Bảo, Phường 04, Quận Gò Vấp, Thành phố Hồ Chí Minh, Việt Nam)
           name: endPointLat
           schema:
             type: number
-            default: 10.876927
-        - in: query
+            default: 10.9383
+        - in: query 
           name: endPointLong
           schema:
             type: number
-            default: 106.807782
+            default: 106.824
         - in: query
           name: time
           schema:
@@ -375,6 +377,131 @@ paths:
           description: Server internal error
       security:
         - api_key: []  
+  /booking/{id}:
+    patch:
+      summary: user update booking
+      tags:
+        - booking
+      parameters:
+        - name: id
+          in: path
+          description: objectId of booking
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+                type: object
+                properties:
+                  applyNum:
+                    type: string
+                    default: 1
+                  watchedNum:
+                    type: string
+                    default: 1
+                  savedNum:
+                    type: string
+                    default: 1
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Booking_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    put:
+      summary: user update booking
+      tags:
+        - booking
+      parameters:
+        - name: id
+          in: path
+          description: objectId of booking
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Booking_post'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Booking_get'             
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
+    delete:
+      summary: user remove booking
+      tags:
+        - booking
+      parameters:
+        - name: id
+          in: path
+          description: objectId of booking
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    default: true
+                  message:
+                    type: string
+                    example: string
+                  data:
+                    type: object
+                    $ref: '#/components/schemas/Booking_get'      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
   /booking/saved/{id}:
     post:
       summary: user save booking
@@ -1801,37 +1928,37 @@ components:
           example: "go to school"
         time:
           type: string
-          example: "2023-03-15T04:27:41.000+00:00"
+          example: "2024-03-15T04:27:41.000+00:00"
         startPointLat:
           type: int32
-          example: 10.762622
+          example: 10.8686
         startPointLong:
           type: int32
-          example: 106.660172
+          example: 106.7964
         startPointId:
           type: string
           example: "string"
         startPointMainText:
           type: string
-          example: Ho Chi Minh City, Vietnam
+          example: Đại học Quốc gia Thành phố Hồ Chí Minh
         startPointAddress:
           type: string
-          example: Ho Chi Minh City, Vietnam
+          example: Thành phố Thủ Đức, Thành phố Hồ Chí Minh và Thành phố Dĩ An, tỉnh Bình Dương, Việt Nam
         endPointLat:
           type: int32
-          example: 11.375031
+          example: 10.9383
         endPointLong:
           type: int32
-          example: 106.131363
+          example: 106.824
         endPointId:
           type: string
           example: "string"
         endPointMainText:
           type: string
-          example: Tay Ninh, Tay Ninh province, Vietnam
+          example: Trường Đại học Công nghiệp TP.HCM
         endPointAddress:
           type: string
-          example: Tay Ninh, Tay Ninh province, Vietnam
+          example: 12 Nguyễn Văn Bảo, Phường 04, Quận Gò Vấp, Thành phố Hồ Chí Minh, Việt Nam
         distance:
           type: string
           example: "1.41 km"

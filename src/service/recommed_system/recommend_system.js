@@ -1,8 +1,8 @@
 const { BOOKING_STATUS } = require('../../contrants');
 const Booking = require('../../models/booking');
 const { getBookingSimWithInput } = require('./utils');
-let increaseFator = 0.97;
-let decreaseFator = 0.97;
+let increaseFator = 0.01;
+let decreaseFator = 0.01;
 let minForDriftAtribute = -1;
 let minICV = -1;
 
@@ -84,6 +84,7 @@ exports.calculateICVForNewItem = async (booking) => {
             icv += bookings[i].dis * bookings[i].interesestValue;
             sum_sim += bookings[i].dis;
         }
+      
         // reuse: 
         booking.interesestConfidenceValue = icv / sum_sim;
 
@@ -93,10 +94,11 @@ exports.calculateICVForNewItem = async (booking) => {
         await Booking.updateMany({
             isCaseBased: true,
         }, {
-            diftAtribute: { $multiply: ["$diftAtribute", decreaseFator] }
+            $inc: { diftAtribute: decreaseFator }
         });
 
         await Booking.deleteMany({
+            isReal: false,
             diftAtribute: { $lt: minForDriftAtribute },
         })
     } catch (error) {
@@ -114,10 +116,10 @@ exports.updateCaseBaseSolution = async (id, value) => {
         // hate - ignore
         // increase/decrease drift Atribute
         if (value == "numWatch" || value == "numSaved" || value == "numApply") {
-            booking.diftAtribute /= increaseFator;
+            booking.diftAtribute += increaseFator;
         }
         else {
-            booking.diftAtribute *= decreaseFator;
+            booking.diftAtribute -= decreaseFator;
         }
 
         // cal iv
@@ -142,7 +144,7 @@ exports.updateCaseBaseSolution = async (id, value) => {
 }
 
 // retain
-exports.saveNewCaseBase = async (id, value) => {
+exports.saveNewCaseBase = async (id) => {
     try {
         let booking = await Booking.findById(id);
         booking.isCaseBased = true;
