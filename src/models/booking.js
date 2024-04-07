@@ -94,15 +94,19 @@ const Booking = new mongoose.Schema({
   },
   applyNum: {
     type: Number,
+    default: 0,
   }, 
   watchedNum: {
     type: Number,
+    default: 0,
   }, 
   savedNum: {
     type: Number,
+    default: 0,
   },
   diftAtribute: {
     type: Number,
+    default: 1,
   },
   isNew: {
     type: Boolean,

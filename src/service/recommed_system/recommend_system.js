@@ -1,77 +1,159 @@
-const readXlsxFile = require('read-excel-file/node')
-const ubilabs = require()
-class RecommendSystem {
-    constructor(increaseFator, decreaseFator, minForDriftAtribute, minICV) {
-        // use to update driftAttribute when user like item
-        this.increaseFator = increaseFator;
+const { BOOKING_STATUS } = require('../../contrants');
+const Booking = require('../../models/booking');
+const { getBookingSimWithInput } = require('./utils');
+let increaseFator = 0.97;
+let decreaseFator = 0.97;
+let minForDriftAtribute = -1;
+let minICV = -1;
 
-        // use to update driftAttribute when user hate item
-        this.decreaseFator = decreaseFator;
-
-        this.minForDriftAtribute = minForDriftAtribute;
-        this.minICV = minICV;
-        this.isTraining = false;
-    }
-    
-    async train() {
-        console.log("Starting training...");
-        this.isTraining = true;
-        this.kdTreeForRecommmedNews = 1;
-        this.kdTreeForRecommedOlds = 1;
-
-        this.kdTreeCaseBase = 1;
-
-        this.isTraining = false;
-        console.log("Done training...");
-    }
-
-    recommed(startPointLat, startPointLong, endPointLat, endPointLong, time){
-        let news = [];
-        let olds = [];
+exports.recommedBookings = async (input) => {
+    try {
+        // startPointLat, startPointLong, endPointLat, endPointLong, time
         // get from kdTreeForRecommend
-        
-        
-        return { news, olds };
-    }
+        let bookings = await Booking.aggregate([
+            {
+                $match:
+                {
+                    isReal: true,
+                    status: BOOKING_STATUS.available,
+                }
+            },
+            {
 
-    calculateICVForNewItem(booking){
-        // retrive: get similarity case-base - booking
-        // reuse: 
-    }
-    // Manage case base
-    // retrive - get
-    // retain - add
-    // revise - update
-    // matain - delete
-}
+                $project: {
+                    'startPointLat': 1,
+                    'startPointLong': 1,
+                    'endPointLat': 1,
+                    'endPointLong': 1,
+                    'time': 1,
+                    'isCaseBased': 1
+                }
+            },
+        ]);
 
+        let news = bookings.filter((e) => { return e.isCaseBased == false });
+        let olds = bookings.filter((e) => { return e.isCaseBased == true });
 
-async function main(){
-    const _recommedSystem = new RecommendSystem(0.97, 0.97, -1, -1);
-
-    let rows = await readXlsxFile(process.cwd() + '/src/service/recommed_system/data/booking_data.xlsx');
-    rows.shift();
-    let datas = rows.map((row) => {
-        return {
-            startPointMainText: row[0],
-            startPointAddress: row[1],
-            startPointLat: row[2],
-            startPointLong: row[3],
-            endPointMainText: row[4],
-            endPointAddress: row[5],
-            endPointLat: row[6],
-            endPointLong: row[7],
-            'distance' : row[8],
-            bookingType: row[9],
-            price: row[10],
-            applyNum: row[11],
-            watchedNum: row[12],
-            savedNum: row[13],
-            time: new Date(row[14]),
-            point: row[15],
+        let numNew = 7, numOld = 3;
+        if (olds.length < numOld) {
+            numNew += numOld - olds.length;
+            numOld = olds.length;
         }
-    })
-    console.log(datas[0]);
+        if (news.length < numNew) numNew = news.length;
+
+        news = getBookingSimWithInput(news, input, numNew);
+        olds = getBookingSimWithInput(olds, input, numOld);
+
+        return { news, olds };
+    } catch (err) {
+        throw (err);
+    }
 }
-main()
-// exports.recommedSystem = _recommedSystem
+
+exports.calculateICVForNewItem = async (booking) => {
+    try {
+
+        // retrive: get similarity case-base - booking
+        // booking : isCaseBased = true
+        let bookings = await Booking.aggregate([
+            {
+                $match:
+                {
+                    isCaseBased: true,
+                }
+            },
+            {
+
+                $project: {
+                    'startPointLat': 1,
+                    'startPointLong': 1,
+                    'endPointLat': 1,
+                    'endPointLong': 1,
+                    'time': 1,
+                    'point': 1,
+                    'price' :1,
+                    'bookingType': 1,
+                    'interesestValue' : 1,
+                }
+            },
+        ]);
+        bookings = getBookingSimWithInput(bookings, booking, 10);
+
+        let sum_sim = 0, icv = 0;
+        for (let i = 0; i < bookings.length; i++){
+            icv += bookings[i].dis * bookings[i].interesestValue;
+            sum_sim += bookings[i].dis;
+        }
+        // reuse: 
+        booking.interesestConfidenceValue = icv / sum_sim;
+
+        await booking.save();
+
+        // Revise decreaseAllDriftAtribute
+        await Booking.updateMany({
+            isCaseBased: true,
+        }, {
+            diftAtribute: { $multiply: ["$diftAtribute", decreaseFator] }
+        });
+
+        await Booking.deleteMany({
+            diftAtribute: { $lt: minForDriftAtribute },
+        })
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+// revise solution = user intrestest
+exports.updateCaseBaseSolution = async (id, value) => {
+    try {
+        // check this booking is case before 
+        let booking = await Booking.findById(id);
+        // like - numWatch numSaved numApply always increanse
+        // hate - ignore
+        // increase/decrease drift Atribute
+        if (value == "numWatch" || value == "numSaved" || value == "numApply") {
+            booking.diftAtribute /= increaseFator;
+        }
+        else {
+            booking.diftAtribute *= decreaseFator;
+        }
+
+        // cal iv
+        booking.interesestValue = booking.diftAtribute *
+            (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);
+
+        // if drift Atribute < minForDriftAtribute -> delete
+        if (booking.diftAtribute < minForDriftAtribute) {
+            if (booking.isReal == true) {
+                booking.isCaseBased = false;
+            }
+            else {
+                // delete
+            }
+        }
+
+        await booking.save();
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+// retain
+exports.saveNewCaseBase = async (id, value) => {
+    try {
+        let booking = await Booking.findById(id);
+        booking.isCaseBased = true;
+        // cal iv
+        booking.interesestValue = booking.diftAtribute *
+            (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);
+        await booking.save();
+    } catch (error) {
+        throw error;
+    }
+
+}
+
+

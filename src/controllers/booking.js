@@ -8,6 +8,7 @@ const {splitAddress, stringToSlug,  geoHash,
   timeDifference,
   compareGeohashes,} = require("../utils/utils.js");
 const {BOOKING_STATUS} = require("../contrants.js");
+const {recommedBookings} = require("../service/recommed_system/recommend_system.js")
 
 exports.create = async (req, res) => {
   try {
@@ -103,7 +104,7 @@ exports.getList = async (req, res) => {
     
     let filter = [];
     filter.push({  isReal: true });
-    
+
     let {
       page, pageSize, 
       keyword,
@@ -283,53 +284,40 @@ exports.getList = async (req, res) => {
 
 exports.getRecommend = async (req, res) => {
   try {
-    // let input = {
-    //   // Đông Hòa Dĩ An, Bình Dương
-    //   startPointGeoHash : geoHash(Number(req.query.startPointLat),Number(req.query.startPointLong),),
-    //   endPointGeoHash : geoHash(Number(req.query.endPointLat),Number(req.query.endPointLong),),
-    //   "time" : new Date(req.query.time),
-    // }
+    let input = {
+      startPointLat: Number(req.query.startPointLat), 
+      startPointLong: Number(req.query.startPointLong),
+      endPointLat: Number(req.query.endPointLat),
+      endPointLong: Number(req.query.endPointLong),
+      time: new Date(req.query.time),
+    }
 
-    // let bookingVectors = await BookingVector.find().lean();
-
-    //   // calculate distance between vectors
-    // for (let i = 0; i < bookingVectors.length; i++) {
-    //   let startPointDis = compareGeohashes(input.startPointGeoHash,bookingVectors[i].startPointGeoHash );
-      
-    //   let endPointDis = compareGeohashes(input.endPointGeoHash, bookingVectors[i].endPointGeoHash);
-
-    //   let timeDis = timeDifference(input.time, bookingVectors[i].time);
-
-    //   // console.log(startPointDis, endPointDis, timeDis);
-
-    //   let dis = startPointDis * startPointDis + endPointDis * endPointDis + timeDis * timeDis;
-
-    //   dis = Math.sqrt(dis);
-
-    //   bookingVectors[i].dis = dis;
-    // }
+    let {news, olds} = await recommedBookings(input);
 
 
-    // bookingVectors.sort(function compare(a, b) {
-    //   return a.dis < b.dis;
-    // })
+    let bookingNewIds = news.map((value) => {return value._id;});
+    let bookingOldIds = olds.map((value) => {return value._id;});
+    let bookingNews = [], bookingOlds = [];
 
-   
-    // let bookingIds = bookingVectors.slice(0, 5).map((value) => {return value.booking;});
-    // console.log(bookingIds);
-    // let bookings = await Booking.find(
-    //   {'_id':{$in: bookingIds}},
-    // ).populate("authorId");
+    await Promise.all([
+      Booking.find(
+        {'_id':{$in: bookingNewIds}},
+      ).sort({interesestConfidenceValue: -1}).populate("authorId").then( (value) => {
+        bookingNews = value;
+      }),
+      Booking.find(
+        {'_id':{$in: bookingOldIds}},
+      ).sort({interesestValue: -1}).populate("authorId").then( (value) => {
+        bookingOlds = value;
+      }),
+    ]);
 
-    // return sendSuccess(res,"Get recommend bookings succesfully", bookings, bookings.length);
+    return sendSuccess(res, "Get recommend bookings succesfully",
+      [...bookingNews,...bookingOlds],
+      bookingNews.length + bookingOlds.length,
+    );
 
-    res.status(200).json({
-      success: true,
-      message: "Get recommend bookings succesfully",
-      // distance: bookingVectors.slice(0, 5).map((value) => {return value.dis;}),
-      // data: bookings,
-      // total:  bookings.length,
-    })
+
   } catch (e) {
     console.log(e);
     return sendServerError(res);
