@@ -101,7 +101,7 @@ exports.update = async (req, res) => {
 exports.updateSome = async (req, res) => {
   try {
     const {id} = req.params;
-    const {applyNum, watchedNum, savedNum, ...data} = req.body;
+    const {applyNum, watchedNum, savedNum, status} = req.body;
     let value = {};
     let check = false;
 
@@ -121,6 +121,11 @@ exports.updateSome = async (req, res) => {
     }
     
     if (check == true) value = { $inc: value }
+    
+    // if (status != null && status != undefined && status != '') {
+    //   value['status'] = status;
+    // }
+
     let booking = await  Booking.findByIdAndUpdate(id, value ).lean();
 
    
@@ -316,13 +321,27 @@ exports.getList = async (req, res) => {
 
 exports.getRecommend = async (req, res) => {
   try {
-    let input = {
-      startPointLat: Number(req.query.startPointLat), 
-      startPointLong: Number(req.query.startPointLong),
-      endPointLat: Number(req.query.endPointLat),
-      endPointLong: Number(req.query.endPointLong),
-      time: new Date(req.query.time),
+    let { type } = req.query;
+    let input = {};
+    if (type == 'from_input'){
+      input = {
+        startPointLat: Number(req.query.startPointLat), 
+        startPointLong: Number(req.query.startPointLong),
+        endPointLat: Number(req.query.endPointLat),
+        endPointLong: Number(req.query.endPointLong),
+        time: new Date(req.query.time),
+      }
     }
+    if (type == 'from_user'){
+      input = {
+        startPointLat: Number(req.query.startPointLat), 
+        startPointLong: Number(req.query.startPointLong),
+        endPointLat: Number(req.query.endPointLat),
+        endPointLong: Number(req.query.endPointLong),
+        time: new Date(req.query.time),
+      }
+    }
+    
 
     let bookings = await recommedBookings(input);
 

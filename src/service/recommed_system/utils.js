@@ -22,7 +22,7 @@ function timeDifference(startTime, endTime) {
     const endDate = new Date(endTime);
   
     // Calculate the difference in milliseconds
-    const difference = endDate.getTime() - startDate.getTime();
+    const difference = Math.abs(endDate.getTime() - startDate.getTime());
   
     // Convert the difference to hours, minutes, and seconds
     // const hours = Math.floor(difference / 1000 / 60 / 60);
@@ -72,6 +72,8 @@ exports.getBookingSimWithInput =  (bookings, input, limit) => {
 
 exports.getCaseBaseSim =  (bookings, booking, limit) => {
   // startPointLat, startPointLong, endPointLat, endPointLong, time
+
+  
   for (let i = 0; i < bookings.length; i++) {
     let startPointDis = haversine(
       booking.startPointLat, booking.startPointLong, 
@@ -95,7 +97,8 @@ exports.getCaseBaseSim =  (bookings, booking, limit) => {
     // timDis tính theo giờ 
 
     // price khoảng > 1000 nen chia cho 1000
-    let dis = startPointDis  + endPointDis  + timeDis + priceDis + pointDis + typeDis;
+    let dis = 0.3 * startPointDis  + 0.4 * endPointDis  + 0.1 * timeDis + 
+    0.05 * priceDis + 0.05 * pointDis + 0.1 *typeDis;
 
 
     bookings[i].dis = dis;
@@ -109,3 +112,12 @@ exports.getCaseBaseSim =  (bookings, booking, limit) => {
  
   return bookings.slice(0, limit);
 }
+
+exports.calculateIV = (diftAtribute, applyNum, watchedNum, savedNum) => {
+    let applyValue = 0, watchedValue = 0, savedValue = 0;
+    applyValue = Math.min(2, applyNum / 10);
+    watchedValue = Math.min(2, watchedNum / 10);
+    savedValue = Math.min(2, savedNum / 10);
+
+    return diftAtribute * (applyValue * 0.5 + watchedValue * 0.25 + savedValue * 0.25);
+} 

@@ -5,7 +5,7 @@ const Booking = new mongoose.Schema({
   authorId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'user',
-    require: true,
+    default: null,
   },
   status: {
     type: Number,
@@ -90,13 +90,13 @@ const Booking = new mongoose.Schema({
   userMayFavorites : {
     type: [String],
     unique: true,
-    index:true
+    // index:true
   },
   //save complete booking/ case base which use for calculate icv 
   caseBaseUsed : {
     type: [String],
     unique: true,
-    index:true
+    // index:true
   },
   applyNum: {
     type: Number,

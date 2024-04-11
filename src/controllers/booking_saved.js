@@ -6,6 +6,7 @@ const dataName = "booking_saved";
 exports.add = async (req, res, next) => {
     try {
       await Booking.updateOne({ _id: req.params.id }, {
+        $inc: {savedNum : 1},
         $addToSet : {
           userFavorites: req.user.user_id,
         } 

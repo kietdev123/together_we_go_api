@@ -1,6 +1,6 @@
 const { BOOKING_STATUS } = require('../../contrants');
 const Booking = require('../../models/booking');
-const { getBookingSimWithInput } = require('./utils');
+const { getBookingSimWithInput, calculateIV } = require('./utils');
 let increaseFator = 0.01;
 let decreaseFator = 0.01;
 let minForDriftAtribute = -1;
@@ -37,7 +37,7 @@ exports.recommedBookings = async (input) => {
     }
 }
 
-exports.calculateICVForNewItem = async (booking) => {
+exports.calculateICVForNewItem = async (booking,) => {
     try {
 
         // retrive: get similarity case-base - booking
@@ -69,11 +69,13 @@ exports.calculateICVForNewItem = async (booking) => {
             icv += bookings[i].dis * bookings[i].interesestValue;
             sum_sim += bookings[i].dis;
         }
-      
+        
+        if (sum_sim != 0){
+            booking.interesestConfidenceValue = icv / sum_sim;
+            await booking.save();
+        }
         // reuse: 
-        booking.interesestConfidenceValue = icv / sum_sim;
-
-        await booking.save();
+  
 
         // Revise decreaseAllDriftAtribute
         await Booking.updateMany({
@@ -88,45 +90,18 @@ exports.calculateICVForNewItem = async (booking) => {
 
 }
 
-// revise solution = user intrestest
-exports.updateCaseBaseSolution = async (id, value) => {
-    try {
-        // check this booking is case before 
-        let booking = await Booking.findById(id);
-        // like - numWatch numSaved numApply always increanse
-        // hate - ignore
-        // increase/decrease drift Atribute
-        if (value == "numWatch" || value == "numSaved" || value == "numApply") {
-            booking.diftAtribute += increaseFator;
-        }
-        else {
-            booking.diftAtribute -= decreaseFator;
-        }
-
-        // cal iv
-        booking.interesestValue = booking.diftAtribute *
-            (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);
-
-
-        await booking.save();
-    } catch (error) {
-        throw error;
-    }
-
-}
-
 // retain
 exports.saveNewCaseBase = async (id) => {
     try {
         let booking = await Booking.findById(id);
         // cal iv
-        booking.interesestValue = booking.diftAtribute *
-            (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);
+        booking.interesestValue = 
+            calculateIV(booking.diftAtribute,booking.applyNum,booking.watchedNum,booking.savedNum);
+        booking.status =  BOOKING_STATUS.complete;
         await booking.save();
     } catch (error) {
         throw error;
     }
-
 }
 
 

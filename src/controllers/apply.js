@@ -6,6 +6,7 @@ const { sendSuccess, sendError, sendServerError} = require("../utils/client.js")
 const dataName = "booking";
 const { sendEvent } = require("../sockets/function/socket.function.js");
 const { APPLY_STATE, BOOKING_STATUS } = require("../contrants.js");
+const {saveNewCaseBase } = require("../service/recommed_system/recommend_system.js");
 
 exports.create = async (req, res, next) => {
   try {
@@ -38,6 +39,9 @@ exports.create = async (req, res, next) => {
       data.save(),
       User.findByIdAndUpdate(req.user.user_id, {
         booking : new mongoose.Types.ObjectId(req.body.booking),
+      }),
+      Booking.findByIdAndUpdate(req.body.booking, {
+        $inc: {applyNum : 1},
       }),
     ]);
 
@@ -89,7 +93,7 @@ exports.update = async (req, res, next) => {
     });
 
     if (req.body.state == "close") {
-      await Booking.findByIdAndUpdate(data.booking.id, {status : BOOKING_STATUS['complete']});
+      await saveNewCaseBase(data.booking.id);
     }
     
     let text = data.booking.authorId.firstName;
