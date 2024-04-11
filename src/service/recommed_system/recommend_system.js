@@ -37,7 +37,7 @@ exports.recommedBookings = async (input) => {
     }
 }
 
-exports.calculateICVForNewItem = async (booking,) => {
+exports.calculateICVForNewItem = async (booking) => {
     try {
 
         // retrive: get similarity case-base - booking
@@ -70,8 +70,11 @@ exports.calculateICVForNewItem = async (booking,) => {
             sum_sim += bookings[i].dis;
         }
         
+        let bookingIds = bookings.map((value) => {return value._id;});
+
         if (sum_sim != 0){
             booking.interesestConfidenceValue = icv / sum_sim;
+            booking.caseBaseUsed = bookingIds;
             await booking.save();
         }
         // reuse: 

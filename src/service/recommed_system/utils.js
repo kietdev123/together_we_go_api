@@ -121,3 +121,20 @@ exports.calculateIV = (diftAtribute, applyNum, watchedNum, savedNum) => {
 
     return diftAtribute * (applyValue * 0.5 + watchedValue * 0.25 + savedValue * 0.25);
 } 
+
+exports.generateRandom = (min, max) => {
+
+  //find diff
+ let difference = max - min;
+
+  //generate random number 
+ let rand = Math.random();
+
+  //multiply with difference 
+ rand = Math.floor(rand * difference);
+
+  //add with min value 
+ rand = rand + min;
+
+ return rand;
+}

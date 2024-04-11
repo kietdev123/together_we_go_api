@@ -329,16 +329,20 @@ exports.getRecommend = async (req, res) => {
         startPointLong: Number(req.query.startPointLong),
         endPointLat: Number(req.query.endPointLat),
         endPointLong: Number(req.query.endPointLong),
-        time: new Date(req.query.time),
+        time: new Date(),
       }
     }
     if (type == 'from_user'){
+      let user = await User.findById(req.user.user_id).populate('booking');
+      if (user.booking == null){
+        return sendError(res, 'Current user not have interact (apply, watch, save) with any booking')
+      }
       input = {
-        startPointLat: Number(req.query.startPointLat), 
-        startPointLong: Number(req.query.startPointLong),
-        endPointLat: Number(req.query.endPointLat),
-        endPointLong: Number(req.query.endPointLong),
-        time: new Date(req.query.time),
+        startPointLat: Number(user.booking.startPointLat), 
+        startPointLong: Number(user.booking.startPointLong),
+        endPointLat: Number(user.booking.endPointLat),
+        endPointLong: Number(user.booking.endPointLong),
+        time: new Date(),
       }
     }
     
@@ -347,11 +351,10 @@ exports.getRecommend = async (req, res) => {
 
 
     let bookingIds = bookings.map((value) => {return value._id;});
+    console.log(bookings);
     let _bookings = await Booking.find(
       {'_id':{$in: bookingIds}},
-    ).sort({interesestConfidenceValue: -1}).populate("authorId").then( (value) => {
-      bookingNews = value;
-    });
+    ).sort({interesestConfidenceValue: -1}).populate("authorId");
 
     return sendSuccess(res, "Get recommend bookings succesfully",
       _bookings,

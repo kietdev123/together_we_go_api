@@ -181,6 +181,12 @@ paths:
       tags:
         - booking
       parameters:
+        - in: query 
+          name: type
+          schema:
+            type: string
+            default: 'from_input'
+            enum : ['from_input', 'from_user']
         - in: query
           description: example Đại học Quốc gia Thành phố Hồ Chí Minh (Thành phố Thủ Đức, Thành phố Hồ Chí Minh và Thành phố Dĩ An, tỉnh Bình Dương, Việt Nam)
           name: startPointLat
@@ -203,11 +209,6 @@ paths:
           schema:
             type: number
             default: 106.824
-        - in: query
-          name: time
-          schema:
-            type: string
-            default: "2023-03-14T04:27:41.000+00:00"
       responses:
         '200':
           description: Successful operation

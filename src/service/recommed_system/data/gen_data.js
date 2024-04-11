@@ -71,7 +71,7 @@ const { BOOKING_STATUS } = require('../../../contrants');
 
  const randomFloat = (min, max) => Math.random() * (max - min) + min;
 
- async function genData(typeGen, limit) {
+ async function genBooking(typeGen, limit) {
      console.log('Doing....');
      let rows = await readXlsxFile(process.cwd() + '/src/service/recommed_system/data/address_data.xlsx');
      console.log('Done read address...')
@@ -163,7 +163,9 @@ const { BOOKING_STATUS } = require('../../../contrants');
  }
 
 //case base
-// genData(BOOKING_STATUS.complete, 1000);
+// genBooking(BOOKING_STATUS.complete, 1000);
 
 //test recommend
-// genData(BOOKING_STATUS.available, 1000);
+// genBooking(BOOKING_STATUS.available, 100);
+
+
