@@ -45,8 +45,6 @@
 //             time: new Date(row[14]),
 //             point: row[15],
 //             diftAtribute: row[16],
-//             isReal: false,
-//             isCaseBased: true,
 //             interesestValue: row[16] *
 //             (row[11] * 0.5 + row[12] * 0.2 + row[13] * 0.3),
 //             // userFavorites: [],

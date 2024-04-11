@@ -92,6 +92,12 @@ const Booking = new mongoose.Schema({
     unique: true,
     index:true
   },
+  //save complete booking/ case base which use for calculate icv 
+  caseBaseUsed : {
+    type: [String],
+    unique: true,
+    index:true
+  },
   applyNum: {
     type: Number,
     default: 0,
@@ -108,10 +114,6 @@ const Booking = new mongoose.Schema({
     type: Number,
     default: 1,
   },
-  isNew: {
-    type: Boolean,
-    default: true,
-  },
   interesestValue: {
     type: Number,
     default: 0,
@@ -120,14 +122,6 @@ const Booking = new mongoose.Schema({
     type: Number,
     default: 0,
   },
-  isReal: {
-    type: Boolean,
-    default: false,
-  },
-  isCaseBased: {
-    type: Boolean,
-    default: false,
-  }
 },
 {
   timestamps: true,

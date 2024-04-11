@@ -14,7 +14,6 @@ exports.recommedBookings = async (input) => {
             {
                 $match:
                 {
-                    isReal: true,
                     status: BOOKING_STATUS.available,
                 }
             },
@@ -26,25 +25,13 @@ exports.recommedBookings = async (input) => {
                     'endPointLat': 1,
                     'endPointLong': 1,
                     'time': 1,
-                    'isCaseBased': 1
                 }
             },
         ]);
 
-        let news = bookings.filter((e) => { return e.isCaseBased == false });
-        let olds = bookings.filter((e) => { return e.isCaseBased == true });
+        bookings = getBookingSimWithInput(bookings, input, 10);
 
-        let numNew = 7, numOld = 3;
-        if (olds.length < numOld) {
-            numNew += numOld - olds.length;
-            numOld = olds.length;
-        }
-        if (news.length < numNew) numNew = news.length;
-
-        news = getBookingSimWithInput(news, input, numNew);
-        olds = getBookingSimWithInput(olds, input, numOld);
-
-        return { news, olds };
+        return bookings;
     } catch (err) {
         throw (err);
     }
@@ -54,16 +41,14 @@ exports.calculateICVForNewItem = async (booking) => {
     try {
 
         // retrive: get similarity case-base - booking
-        // booking : isCaseBased = true
         let bookings = await Booking.aggregate([
             {
                 $match:
                 {
-                    isCaseBased: true,
+                    status: BOOKING_STATUS.complete,
                 }
             },
             {
-
                 $project: {
                     'startPointLat': 1,
                     'startPointLong': 1,
@@ -92,15 +77,11 @@ exports.calculateICVForNewItem = async (booking) => {
 
         // Revise decreaseAllDriftAtribute
         await Booking.updateMany({
-            isCaseBased: true,
+            status: BOOKING_STATUS.complete,
         }, {
             $inc: { diftAtribute: decreaseFator }
         });
 
-        await Booking.deleteMany({
-            isReal: false,
-            diftAtribute: { $lt: minForDriftAtribute },
-        })
     } catch (error) {
         throw error;
     }
@@ -126,15 +107,6 @@ exports.updateCaseBaseSolution = async (id, value) => {
         booking.interesestValue = booking.diftAtribute *
             (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);
 
-        // if drift Atribute < minForDriftAtribute -> delete
-        if (booking.diftAtribute < minForDriftAtribute) {
-            if (booking.isReal == true) {
-                booking.isCaseBased = false;
-            }
-            else {
-                // delete
-            }
-        }
 
         await booking.save();
     } catch (error) {
@@ -147,7 +119,6 @@ exports.updateCaseBaseSolution = async (id, value) => {
 exports.saveNewCaseBase = async (id) => {
     try {
         let booking = await Booking.findById(id);
-        booking.isCaseBased = true;
         // cal iv
         booking.interesestValue = booking.diftAtribute *
             (booking.applyNum * 0.5 + booking.watchedNum * 0.2 + booking.savedNum * 0.3);

@@ -38,8 +38,6 @@ exports.create = async (req, res) => {
       duration: req.body.duration,
       distance: req.body.distance,
       point: user.priorityPoint,
-      isReal: true,
-      isCaseBased: false,
     });
     
     let result = await booking.save();
@@ -125,17 +123,7 @@ exports.updateSome = async (req, res) => {
     if (check == true) value = { $inc: value }
     let booking = await  Booking.findByIdAndUpdate(id, value ).lean();
 
-    if (booking.isCaseBased == true){
-      if (check == true) {
-        //love
-        await updateCaseBaseSolution(id, 'applyNum');
-      }
-      // hate
-    }
-    else {
-      if (booking.applyNum >= 10 && booking.watchedNum >= 10 && booking.savedNum >= 10)
-      saveNewCaseBase(id);
-    }
+   
     return sendSuccess(res,"Booking update succesfully");
 
   } catch (err) {
@@ -148,7 +136,6 @@ exports.getList = async (req, res) => {
   try {
     
     let filter = [];
-    filter.push({  isReal: true });
 
     let {
       page, pageSize, 
@@ -337,29 +324,19 @@ exports.getRecommend = async (req, res) => {
       time: new Date(req.query.time),
     }
 
-    let {news, olds} = await recommedBookings(input);
+    let bookings = await recommedBookings(input);
 
 
-    let bookingNewIds = news.map((value) => {return value._id;});
-    let bookingOldIds = olds.map((value) => {return value._id;});
-    let bookingNews = [], bookingOlds = [];
-
-    await Promise.all([
-      Booking.find(
-        {'_id':{$in: bookingNewIds}},
-      ).sort({interesestConfidenceValue: -1}).populate("authorId").then( (value) => {
-        bookingNews = value;
-      }),
-      Booking.find(
-        {'_id':{$in: bookingOldIds}},
-      ).sort({interesestValue: -1}).populate("authorId").then( (value) => {
-        bookingOlds = value;
-      }),
-    ]);
+    let bookingIds = bookings.map((value) => {return value._id;});
+    let _bookings = await Booking.find(
+      {'_id':{$in: bookingIds}},
+    ).sort({interesestConfidenceValue: -1}).populate("authorId").then( (value) => {
+      bookingNews = value;
+    });
 
     return sendSuccess(res, "Get recommend bookings succesfully",
-      [...bookingNews,...bookingOlds],
-      bookingNews.length + bookingOlds.length,
+      _bookings,
+      _bookings.length,
     );
 
 
