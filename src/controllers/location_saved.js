@@ -17,7 +17,9 @@ exports.create = async (req, res, next) => {
                 return sendError(res, 'type value error, try these value : home / company / other');
             }
         data['type'] = type;
-    }   
+    }
+    await LocationSaved.deleteMany(data);
+    
     if (placeName != null && placeName != undefined && placeName != '')
         data['placeName'] = placeName;
     if (placeDescription != null && placeDescription != undefined && placeDescription != '')
