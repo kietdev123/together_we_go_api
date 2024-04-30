@@ -18,6 +18,27 @@ tags:
   - name: user
   - name: notification
 paths:
+  /statistics:
+    get:
+      tags:
+        - statistics
+      description:  admin get statistics
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accsess_token:
+                    type: string      
+        '400':
+          description: Invalid ID supplied
+        '500':
+          description: Server internal error
+      security:
+        - api_key: []
   /auth/register:
     post:
       tags:

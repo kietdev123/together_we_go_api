@@ -21,6 +21,7 @@ const reviewRoutes = require("./routes/review.js");
 const notificationRoutes = require("./routes/notification.js");
 const locationHistorySearchRoutes = require("./routes/location_history_search.js");
 const locationSavedRoutes = require("./routes/location_saved.js");
+const statisticsRoutes = require("./routes/statistics.js");
 const morgan =  require("morgan");
 const useragent =  require('express-useragent');
 const requestIp =  require('request-ip')
@@ -67,5 +68,6 @@ app.use("/api/review", verifyToken, reviewRoutes);
 app.use("/api/notification", verifyToken, notificationRoutes);
 app.use("/api/location-history-search", verifyToken, locationHistorySearchRoutes);
 app.use("/api/location-saved", verifyToken, locationSavedRoutes);
+app.use("/api/statistics", verifyToken, statisticsRoutes);
 
 module.exports = app;
