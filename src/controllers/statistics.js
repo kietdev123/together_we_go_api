@@ -38,6 +38,7 @@ exports.get = async (req, res, next) => {
         })
     }
 
+
     return sendSuccess(res, 'Get Statistics Success', {
         total : {
             user: numUser,

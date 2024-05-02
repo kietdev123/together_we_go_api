@@ -216,12 +216,13 @@ exports.getList = async (req, res) => {
        filter.push({'price' : priceRange});
 
 
+    let keyWordFilter = {};
     if ( keyword != null &&  keyword != undefined &&  keyword != '') {
-        filter.push({
+      keyWordFilter = {
           $text: {$search: keyword,  
             $caseSensitive: false,
             $diacriticSensitive: false}
-        })
+        }
       } 
       
     if ( startAddress != null &&  startAddress != undefined &&  startAddress != '') {
@@ -277,6 +278,7 @@ exports.getList = async (req, res) => {
     }
 
     let bookings = await Booking.aggregate([
+      { $match: keyWordFilter},
       {
         $addFields: {
           isFavorite: {
@@ -296,22 +298,29 @@ exports.getList = async (req, res) => {
         }
         
       },
+   
     { $match: filter }, // Match documents based on the filter
     { $sort: _sort }, // Sort the matched documents
-    { $skip: skipNum }, // Skip documents for pagination
-    { $limit: pageSize }, // Limit the number of documents per page
-    { $lookup: { // Populate the "authorId" field
-        from: "users", // Assuming "authors" is the collection name
-        localField: "authorId",
-        foreignField: "_id",
-        as: "authorId"
-      }
-    },
-    { $unwind: "$authorId" } // Deconstruct the "author" array
-  ]);
-  
 
-    return sendSuccess(res,"Get bookings succesfully", bookings, bookings.length);
+    { $facet: {
+      count:  [{ $count: "count" }],
+      data: [
+        { $skip: skipNum }, // Skip documents for pagination
+        { $limit: pageSize }, // Limit the number of documents per page
+        { $lookup: { // Populate the "authorId" field
+            from: "users", // Assuming "authors" is the collection name
+            localField: "authorId",
+            foreignField: "_id",
+            as: "authorId"
+          }
+        },
+        { $unwind: "$authorId" } // Deconstruct the "author" array
+      ]
+    }},  
+  ]);
+
+
+    return sendSuccess(res,"Get bookings succesfully", bookings[0].data, bookings[0].count[0].count);
 
   } catch (e) {
     console.log(e);
