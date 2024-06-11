@@ -587,13 +587,13 @@ exports.getBookingInChatBot = async (req, res) => {
 
 
   return res.send({
-    fulfilmentText: JSON.stringify(bookings[0].data[0]).replace('/','')
+    fulfillmentText: JSON.stringify(bookings[0].data[0]).replace('/','')
   });
 
   } catch (e) {
     console.log(e);
     return res.send({
-      fulfilmentText: '',
+      fulfillmentText: '',
     });
   }
 };
