@@ -400,195 +400,46 @@ exports.delete = async (req, res) => {
 exports.getBookingInChatBot = async (req, res) => {
   try {
     
-    let filter = [];
-
-    let {
-      keyword,
-      page,
-      pageSize,
-      //sortCreatedAt, sortUpdatedAt, 
-      status, authorId, 
-      minPrice, maxPrice,
-      startAddress, endAddress,
-      startTime, endTime,
-      bookingType,
-      isFavorite,
-      isMayFavorite,
-      isMine,
-      id,
-    } = req.query;
-    console.log(req.query);
-    startAddress = stringToSlug(startAddress)
-    endAddress = stringToSlug(endAddress)
-
-    let skipNum = 0;
-
-    if (page) page = Number(page);
-    else page = 1
-
-    if (pageSize) pageSize = Number(pageSize);
-    else pageSize = 20;
-
-    skipNum = (page - 1) * pageSize;
-    if (skipNum < 0) skipNum = 0;
-    
-    if (id != null && id != undefined && id != '') 
-      filter.push({  "_id": new mongoose.Types.ObjectId(id) });
-    if (isFavorite != null && isFavorite != undefined && isFavorite != '') 
-      filter.push({ 'isFavorite' : isFavorite === 'true'});
-    if (isMayFavorite != null && isMayFavorite != undefined && isMayFavorite != '') 
-      filter.push({ 'isMayFavorite' : isMayFavorite === 'true'});
-    if (isMine != null && isMine != undefined && isMine != ''){
-      if (isMine === 'true') {
-        filter.push({
-          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
-        })
-      }
-      else {
-        filter.push({
-          $nor: [{
-          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
-        }]})
+    let { type } = req.query;
+    let input = {};
+    if (type == 'from_input'){
+      input = {
+        startPointLat: Number(req.query.startPointLat), 
+        startPointLong: Number(req.query.startPointLong),
+        endPointLat: Number(req.query.endPointLat),
+        endPointLong: Number(req.query.endPointLong),
+        time: new Date(),
       }
     }
-      
-    if (bookingType != null && bookingType != undefined && bookingType != '') 
-      filter.push({ 'bookingType' : bookingType});
-    if (status != null && status != undefined && status != '') 
-      filter.push({ 'status' : Number(status)});
-    if (authorId != null && authorId != undefined && authorId != '') 
-      filter.push({ 'authorId' : new mongoose.Types.ObjectId(authorId)});
+    if (type == 'from_user'){
+      let user = await User.findById(req.user.user_id).populate('booking');
+      if (user.booking == null){
+        return sendError(res, 'Current user not have interact (apply, watch, save) with any booking')
+      }
+      input = {
+        startPointLat: Number(user.booking.startPointLat), 
+        startPointLong: Number(user.booking.startPointLong),
+        endPointLat: Number(user.booking.endPointLat),
+        endPointLong: Number(user.booking.endPointLong),
+        time: new Date(),
+      }
+    }
     
-    let priceRange = {}
 
-    if (minPrice != null && minPrice != undefined && minPrice != '') {
-        minPrice = Number(minPrice);
-        priceRange["$gte"] = minPrice;
-    }
-       
-   
-    if (maxPrice != null && maxPrice != undefined && maxPrice != '') {
-      maxPrice = Number(maxPrice);
-      priceRange["$lte"] = maxPrice;
-    }
-      
-   
-    if ( Object.keys(priceRange).length > 0)
-       filter.push({'price' : priceRange});
+    let bookings = await recommedBookings(input);
 
 
-    let keyWordFilter = {};
-    if ( keyword != null &&  keyword != undefined &&  keyword != '') {
-      keyWordFilter = {
-          $text: {$search: keyword,  
-            $caseSensitive: false,
-            $diacriticSensitive: false}
-        }
-      } 
-      
-    if ( startAddress != null &&  startAddress != undefined &&  startAddress != '') {
+    let bookingIds = bookings.map((value) => {return value._id;});
+    console.log(bookings);
+    let _bookings = await Booking.find(
+      {'_id':{$in: bookingIds}},
+    ).sort({interesestConfidenceValue: -1}).populate("authorId");
 
-      filter.push({
-        $or: [
-          {'startPointMainText' : { $regex: startAddress, $options: 'i' } },
-          {'startPointAddress' : { $regex: startAddress, $options: 'i' } },
-        ]
-      })
-    } 
+    console.log(_bookings);
 
-    if ( endAddress != null &&  endAddress != undefined &&  endAddress != '') {
-      filter.push({
-        $or: [
-          {'endPointMainText' : { $regex: endAddress, $options: 'i' } },
-          {'endPointAddress' : { $regex: endAddress, $options: 'i' } },
-        ]
-      })
-    } 
-      
-    let timeRange = {}
-
-    if (startTime != null && startTime != undefined && startTime != '') {
-        timeRange["$gte"] = new Date(startTime);
-    }
-          
-    if (endTime != null && endTime != undefined && endTime != '') {
-      timeRange["$lte"] = new Date(endTime);
-    }
-       
-
-    if ( Object.keys(timeRange).length > 0)
-      filter.push({'createdAt' : timeRange});
- 
-    let _sort = {
-      'status': -1,
-      'interesestConfidenceValue' : -1,
-      'point' : -1,
-      'createdAt' : -1,
-    };
-
-    // if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
-    //    _sort.createdAt = Number(sortCreatedAt);
-
-    // if (sortUpdatedAt != null && sortUpdatedAt != undefined && sortUpdatedAt != '')
-    //    _sort.updatedAt = Number(sortUpdatedAt);
-
-    console.log(filter);
-    req.user = {
-      'user_id' : '1'
-    }
- 
-
-    if (filter.length == 0) filter = {};
-    else filter = {
-      $and: filter,
-    }
-
-    let bookings = await Booking.aggregate([
-      { $match: keyWordFilter},
-      {
-        $addFields: {
-          isFavorite: {
-            $cond: { // Conditionally set isHave based on the presence of value_x in users
-              if: { $in: [req.user.user_id, "$userFavorites"]}, // Check if value_x exists in the users array
-              then: true, // Set isHave to true if value_x exists
-              else: false // Set isHave to false otherwise
-            }
-          },
-          isMayFavorite: {
-            $cond: { // Conditionally set isHave based on the presence of value_x in users
-              if: { $in: [req.user.user_id, "$userMayFavorites"]}, // Check if value_x exists in the users array
-              then: true, // Set isHave to true if value_x exists
-              else: false // Set isHave to false otherwise
-            }
-          }
-        }
-        
-      },
-   
-    { $match: filter }, // Match documents based on the filter
-    { $sort: _sort }, // Sort the matched documents
-
-    { $facet: {
-      count:  [{ $count: "count" }],
-      data: [
-        { $skip: skipNum }, // Skip documents for pagination
-        { $limit: pageSize }, // Limit the number of documents per page
-        { $lookup: { // Populate the "authorId" field
-            from: "users", // Assuming "authors" is the collection name
-            localField: "authorId",
-            foreignField: "_id",
-            as: "authorId"
-          }
-        },
-        { $unwind: "$authorId" } // Deconstruct the "author" array
-      ]
-    }},  
-  ]);
-
-
-  return res.send({
-    fulfillmentText: JSON.stringify(bookings[0].data[0]).replace('/','')
-  });
+    return res.send({
+      fulfillmentText: JSON.stringify(_bookings[0]).replace('/','')
+    });
 
   } catch (e) {
     console.log(e);

@@ -71,7 +71,7 @@ app.use("/api/notification", verifyToken, notificationRoutes);
 app.use("/api/location-history-search", verifyToken, locationHistorySearchRoutes);
 app.use("/api/location-saved", verifyToken, locationSavedRoutes);
 app.use("/api/statistics", verifyToken, statisticsRoutes);
-app.use("/api/chatbot", chatBotRoutes);
+app.use("/api/chatbot", verifyToken, chatBotRoutes);
 
 
 module.exports = app;
