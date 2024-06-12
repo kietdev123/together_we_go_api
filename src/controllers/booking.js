@@ -400,16 +400,16 @@ exports.delete = async (req, res) => {
 exports.getBookingInChatBot = async (req, res) => {
   try {
     
-    let { type } = req.query;
+    let { type } = req.body.queryResult.parameters;
     console.log(req);
     
     let input = {};
     if (type == 'from_input'){
       input = {
-        startPointLat: Number(req.query.startPointLat), 
-        startPointLong: Number(req.query.startPointLong),
-        endPointLat: Number(req.query.endPointLat),
-        endPointLong: Number(req.query.endPointLong),
+        startPointLat: Number(req.body.queryResult.parameters.startPointLat), 
+        startPointLong: Number(req.body.queryResult.parameters.startPointLong),
+        endPointLat: Number(req.body.queryResult.parameters.endPointLat),
+        endPointLong: Number(req.body.queryResult.parameters.endPointLong),
         time: new Date(),
       }
     }
