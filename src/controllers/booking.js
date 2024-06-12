@@ -401,6 +401,8 @@ exports.getBookingInChatBot = async (req, res) => {
   try {
     
     let { type } = req.query;
+    console.log(req);
+    
     let input = {};
     if (type == 'from_input'){
       input = {
