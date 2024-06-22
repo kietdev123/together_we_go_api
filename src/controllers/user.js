@@ -30,9 +30,12 @@ exports.getOne = async (req, res, next) => {
       Booking.find({'authorId' : new mongoose.Types.ObjectId(req.params.id)})
       .then((value) => { bookingNum = value.length;}),
     ]);
-    
+    let user = data._doc;
+    user.id = user._id;
+    delete user._id;
+    delete user.__v;
     return sendSuccess(res, `Get 1 ${dataName} successfully`, {
-        ...data,
+        ...user,
         reviewNum,
 applyNum,
 bookingNum,
