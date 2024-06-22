@@ -84,7 +84,7 @@ const Booking = new mongoose.Schema({
   userFavorites : {
     type: [String], 
     unique: true,
-    index:true
+    // index:true
   },
   //save user object id
   userMayFavorites : {

@@ -319,7 +319,15 @@ exports.getList = async (req, res) => {
     }},  
   ]);
 
-
+  let data = bookings[0].data;
+  for (let i = 0; i < data.length ; i ++){
+    bookings[0].data[i].id = bookings[0].data[i]._id;
+    bookings[0].data[i].authorId.id = bookings[0].data[i].authorId._id;
+    delete bookings[0].data[i]._id;
+    delete bookings[0].data[i].authorId._id;
+    delete bookings[0].data[i].__v;
+    delete bookings[0].data[i].authorId.__v;
+  }
     return sendSuccess(res,"Get bookings succesfully", bookings[0].data, bookings[0].count[0].count);
 
   } catch (e) {
