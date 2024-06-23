@@ -48,7 +48,8 @@ const saveMessage = async (payload) => {
 
 const sendEvent = async (userId, eventName, data) => {
   try {
-    const io = require('../../../index.js');
+    // const io = require('../../../index.js');
+    const {io} = require('../../../index.js');
     
     const receiver_socket_id = await UserData.getSocket(userId);
     console.log('socket id', userId, ' ',  receiver_socket_id);
