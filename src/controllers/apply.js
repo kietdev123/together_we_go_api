@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
 const Notification = require("../models/notification.js");
-const User = require("../models/user.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const dataName = "booking";
 const { sendEvent } = require("../sockets/function/socket.function.js");
