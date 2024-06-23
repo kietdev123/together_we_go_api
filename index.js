@@ -17,7 +17,7 @@ var io = require("socket.io")(server, {
   },
 });
 
-//module.exports = io
+// module.exports = io
 // require("./src/sockets/socket");
 // require("./src/sockets/features/chat.feature");
 // require("./src/controllers/message");
@@ -126,3 +126,6 @@ io.on("connection", async (client) => {
     })
 });
 
+// module.exports = io
+
+exports.io = io;
