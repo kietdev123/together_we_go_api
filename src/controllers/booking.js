@@ -3,25 +3,12 @@ const Apply = require("../models/apply.js");
 const Review = require("../models/review.js");
 const User = require("../models/user.js");
 const mongoose = require("mongoose");
-const {
-  sendSuccess,
-  sendError,
-  sendServerError,
-} = require("../utils/client.js");
-const {
-  splitAddress,
-  stringToSlug,
-  geoHash,
+const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
+const {splitAddress, stringToSlug,  geoHash,
   timeDifference,
-  compareGeohashes,
-} = require("../utils/utils.js");
-const { BOOKING_STATUS } = require("../contrants.js");
-const {
-  recommedBookings,
-  calculateICVForNewItem,
-  updateCaseBaseSolution,
-  saveNewCaseBase,
-} = require("../service/recommed_system/recommend_system.js");
+  compareGeohashes,} = require("../utils/utils.js");
+const {BOOKING_STATUS} = require("../contrants.js");
+const {recommedBookings, calculateICVForNewItem, updateCaseBaseSolution, saveNewCaseBase} = require("../service/recommed_system/recommend_system.js")
 
 exports.create = async (req, res) => {
   try {
@@ -52,13 +39,17 @@ exports.create = async (req, res) => {
       distance: req.body.distance,
       point: user.priorityPoint,
     });
-
+    
     let result = await booking.save();
     user.booking = result.id;
+    
+    await Promise.all([
+      user.save(),
+      calculateICVForNewItem(booking),
+    ]);
+    
+    return sendSuccess(res,"Booking added succesfully", result);
 
-    await Promise.all([user.save(), calculateICVForNewItem(booking)]);
-
-    return sendSuccess(res, "Booking added succesfully", result);
   } catch (err) {
     console.log(err);
     return sendServerError(res);
@@ -67,9 +58,9 @@ exports.create = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     let booking = null;
-    await Promise.all([
+        await Promise.all([
       Booking.findByIdAndUpdate(id, {
         authorId: req.user.user_id,
         price: req.body.price,
@@ -94,14 +85,13 @@ exports.update = async (req, res) => {
         duration: req.body.duration,
         distance: req.body.distance,
         //point: user.priorityPoint
-      })
-        .populate("authorId")
-        .then((value) => {
-          booking = value;
-        }),
-    ]);
+      }).populate("authorId").then((value) => {
+        booking = value;
+      }),
+     ]); 
 
-    return sendSuccess(res, "Booking update succesfully", booking);
+    return sendSuccess(res,"Booking update succesfully", booking);
+
   } catch (err) {
     console.log(err);
     return sendServerError(res);
@@ -110,35 +100,37 @@ exports.update = async (req, res) => {
 
 exports.updateSome = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { applyNum, watchedNum, savedNum, status } = req.body;
+    const {id} = req.params;
+    const {applyNum, watchedNum, savedNum, status} = req.body;
     let value = {};
     let check = false;
 
-    if (applyNum != null && applyNum != undefined && applyNum != "") {
+    if (applyNum != null && applyNum != undefined && applyNum != ''){
       check = true;
-      value.applyNum = 1;
+      value.applyNum = 1; 
     }
-
-    if (watchedNum != null && watchedNum != undefined && watchedNum != "") {
+    
+    if (watchedNum != null && watchedNum != undefined && watchedNum != '') {
       check = true;
-      value.watchedNum = 1;
+      value.watchedNum = 1 
     }
-
-    if (savedNum != null && savedNum != undefined && savedNum != "") {
+     
+    if (savedNum != null && savedNum != undefined && savedNum != '') {
       check = true;
       value.savedNum = 1;
     }
-
-    if (check == true) value = { $inc: value };
-
+    
+    if (check == true) value = { $inc: value }
+    
     // if (status != null && status != undefined && status != '') {
     //   value['status'] = status;
     // }
 
-    let booking = await Booking.findByIdAndUpdate(id, value).lean();
+    let booking = await  Booking.findByIdAndUpdate(id, value ).lean();
 
-    return sendSuccess(res, "Booking update succesfully");
+   
+    return sendSuccess(res,"Booking update succesfully");
+
   } catch (err) {
     console.log(err);
     return sendServerError(res);
@@ -147,21 +139,17 @@ exports.updateSome = async (req, res) => {
 
 exports.getList = async (req, res) => {
   try {
+    
     let filter = [];
 
     let {
-      page,
-      pageSize,
+      page, pageSize, 
       keyword,
-      //sortCreatedAt, sortUpdatedAt,
-      status,
-      authorId,
-      minPrice,
-      maxPrice,
-      startAddress,
-      endAddress,
-      startTime,
-      endTime,
+      //sortCreatedAt, sortUpdatedAt, 
+      status, authorId, 
+      minPrice, maxPrice,
+      startAddress, endAddress,
+      startTime, endTime,
       bookingType,
       isFavorite,
       isMayFavorite,
@@ -169,117 +157,111 @@ exports.getList = async (req, res) => {
       id,
     } = req.query;
     console.log(req.query);
-    startAddress = stringToSlug(startAddress);
-    endAddress = stringToSlug(endAddress);
+    startAddress = stringToSlug(startAddress)
+    endAddress = stringToSlug(endAddress)
 
     let skipNum = 0;
 
     if (page) page = Number(page);
-    else page = 1;
+    else page = 1
 
     if (pageSize) pageSize = Number(pageSize);
     else pageSize = 20;
 
     skipNum = (page - 1) * pageSize;
     if (skipNum < 0) skipNum = 0;
-
-    if (id != null && id != undefined && id != "")
-      filter.push({ _id: new mongoose.Types.ObjectId(id) });
-    if (isFavorite != null && isFavorite != undefined && isFavorite != "")
-      filter.push({ isFavorite: isFavorite === "true" });
-    if (
-      isMayFavorite != null &&
-      isMayFavorite != undefined &&
-      isMayFavorite != ""
-    )
-      filter.push({ isMayFavorite: isMayFavorite === "true" });
-    if (isMine != null && isMine != undefined && isMine != "") {
-      if (isMine === "true") {
+    
+    if (id != null && id != undefined && id != '') 
+      filter.push({  "_id": new mongoose.Types.ObjectId(id) });
+    if (isFavorite != null && isFavorite != undefined && isFavorite != '') 
+      filter.push({ 'isFavorite' : isFavorite === 'true'});
+    if (isMayFavorite != null && isMayFavorite != undefined && isMayFavorite != '') 
+      filter.push({ 'isMayFavorite' : isMayFavorite === 'true'});
+    if (isMine != null && isMine != undefined && isMine != ''){
+      if (isMine === 'true') {
         filter.push({
-          authorId: new mongoose.Types.ObjectId(req.user.user_id),
-        });
-      } else {
+          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
+        })
+      }
+      else {
         filter.push({
-          $nor: [
-            {
-              authorId: new mongoose.Types.ObjectId(req.user.user_id),
-            },
-          ],
-        });
+          $nor: [{
+          'authorId' : new mongoose.Types.ObjectId(req.user.user_id)
+        }]})
       }
     }
+      
+    if (bookingType != null && bookingType != undefined && bookingType != '') 
+      filter.push({ 'bookingType' : bookingType});
+    if (status != null && status != undefined && status != '') 
+      filter.push({ 'status' : Number(status)});
+    if (authorId != null && authorId != undefined && authorId != '') 
+      filter.push({ 'authorId' : new mongoose.Types.ObjectId(authorId)});
+    
+    let priceRange = {}
 
-    if (bookingType != null && bookingType != undefined && bookingType != "")
-      filter.push({ bookingType: bookingType });
-    if (status != null && status != undefined && status != "")
-      filter.push({ status: Number(status) });
-    if (authorId != null && authorId != undefined && authorId != "")
-      filter.push({ authorId: new mongoose.Types.ObjectId(authorId) });
-
-    let priceRange = {};
-
-    if (minPrice != null && minPrice != undefined && minPrice != "") {
-      minPrice = Number(minPrice);
-      priceRange["$gte"] = minPrice;
+    if (minPrice != null && minPrice != undefined && minPrice != '') {
+        minPrice = Number(minPrice);
+        priceRange["$gte"] = minPrice;
     }
-
-    if (maxPrice != null && maxPrice != undefined && maxPrice != "") {
+       
+   
+    if (maxPrice != null && maxPrice != undefined && maxPrice != '') {
       maxPrice = Number(maxPrice);
       priceRange["$lte"] = maxPrice;
     }
+      
+   
+    if ( Object.keys(priceRange).length > 0)
+       filter.push({'price' : priceRange});
 
-    if (Object.keys(priceRange).length > 0) filter.push({ price: priceRange });
 
     let keyWordFilter = {};
-    if (keyword != null && keyword != undefined && keyword != "") {
+    if ( keyword != null &&  keyword != undefined &&  keyword != '') {
       keyWordFilter = {
-        $text: {
-          $search: keyword,
-          $caseSensitive: false,
-          $diacriticSensitive: false,
-        },
-      };
-    }
+          $text: {$search: keyword,  
+            $caseSensitive: false,
+            $diacriticSensitive: false}
+        }
+      } 
+      
+    if ( startAddress != null &&  startAddress != undefined &&  startAddress != '') {
 
-    if (
-      startAddress != null &&
-      startAddress != undefined &&
-      startAddress != ""
-    ) {
       filter.push({
         $or: [
-          { startPointMainText: { $regex: startAddress, $options: "i" } },
-          { startPointAddress: { $regex: startAddress, $options: "i" } },
-        ],
-      });
-    }
+          {'startPointMainText' : { $regex: startAddress, $options: 'i' } },
+          {'startPointAddress' : { $regex: startAddress, $options: 'i' } },
+        ]
+      })
+    } 
 
-    if (endAddress != null && endAddress != undefined && endAddress != "") {
+    if ( endAddress != null &&  endAddress != undefined &&  endAddress != '') {
       filter.push({
         $or: [
-          { endPointMainText: { $regex: endAddress, $options: "i" } },
-          { endPointAddress: { $regex: endAddress, $options: "i" } },
-        ],
-      });
+          {'endPointMainText' : { $regex: endAddress, $options: 'i' } },
+          {'endPointAddress' : { $regex: endAddress, $options: 'i' } },
+        ]
+      })
+    } 
+      
+    let timeRange = {}
+
+    if (startTime != null && startTime != undefined && startTime != '') {
+        timeRange["$gte"] = new Date(startTime);
     }
-
-    let timeRange = {};
-
-    if (startTime != null && startTime != undefined && startTime != "") {
-      timeRange["$gte"] = new Date(startTime);
-    }
-
-    if (endTime != null && endTime != undefined && endTime != "") {
+          
+    if (endTime != null && endTime != undefined && endTime != '') {
       timeRange["$lte"] = new Date(endTime);
     }
+       
 
-    if (Object.keys(timeRange).length > 0)
-      filter.push({ createdAt: timeRange });
-
+    if ( Object.keys(timeRange).length > 0)
+      filter.push({'createdAt' : timeRange});
+ 
     let _sort = {
-      status: -1,
-      point: -1,
-      createdAt: -1,
+      'status': -1,
+      'point' : -1,
+      'createdAt' : -1,
     };
 
     // if (sortCreatedAt != null && sortCreatedAt != undefined && sortCreatedAt != '')
@@ -291,36 +273,34 @@ exports.getList = async (req, res) => {
     console.log(filter);
 
     if (filter.length == 0) filter = {};
-    else
-      filter = {
-        $and: filter,
-      };
+    else filter = {
+      $and: filter,
+    }
 
     let bookings = await Booking.aggregate([
-      { $match: keyWordFilter },
+      { $match: keyWordFilter},
       {
         $addFields: {
           isFavorite: {
-            $cond: {
-              // Conditionally set isHave based on the presence of value_x in users
-              if: { $in: [req.user.user_id, "$userFavorites"] }, // Check if value_x exists in the users array
+            $cond: { // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userFavorites"]}, // Check if value_x exists in the users array
               then: true, // Set isHave to true if value_x exists
-              else: false, // Set isHave to false otherwise
-            },
+              else: false // Set isHave to false otherwise
+            }
           },
           isMayFavorite: {
-            $cond: {
-              // Conditionally set isHave based on the presence of value_x in users
-              if: { $in: [req.user.user_id, "$userMayFavorites"] }, // Check if value_x exists in the users array
+            $cond: { // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userMayFavorites"]}, // Check if value_x exists in the users array
               then: true, // Set isHave to true if value_x exists
-              else: false, // Set isHave to false otherwise
-            },
-          },
-        },
+              else: false // Set isHave to false otherwise
+            }
+          }
+        }
+        
       },
-
-      { $match: filter }, // Match documents based on the filter
-      { $sort: _sort }, // Sort the matched documents
+   
+    { $match: filter }, // Match documents based on the filter
+    { $sort: _sort }, // Sort the matched documents
 
     { $facet: {
       count:  [{ $count: "count" }],
@@ -360,48 +340,45 @@ exports.getRecommend = async (req, res) => {
   try {
     let { type } = req.query;
     let input = {};
-    if (type == "from_input") {
+    if (type == 'from_input'){
       input = {
-        startPointLat: Number(req.query.startPointLat),
+        startPointLat: Number(req.query.startPointLat), 
         startPointLong: Number(req.query.startPointLong),
         endPointLat: Number(req.query.endPointLat),
         endPointLong: Number(req.query.endPointLong),
         time: new Date(),
-      };
+      }
     }
-    if (type == "from_user") {
-      let user = await User.findById(req.user.user_id).populate("booking");
-      if (user.booking == null) {
-        return sendError(
-          res,
-          "Current user not have interact (apply, watch, save) with any booking"
-        );
+    if (type == 'from_user'){
+      let user = await User.findById(req.user.user_id).populate('booking');
+      if (user.booking == null){
+        return sendError(res, 'Current user not have interact (apply, watch, save) with any booking')
       }
       input = {
-        startPointLat: Number(user.booking.startPointLat),
+        startPointLat: Number(user.booking.startPointLat), 
         startPointLong: Number(user.booking.startPointLong),
         endPointLat: Number(user.booking.endPointLat),
         endPointLong: Number(user.booking.endPointLong),
         time: new Date(),
-      };
+      }
     }
+    
 
     let bookings = await recommedBookings(input);
 
-    let bookingIds = bookings.map((value) => {
-      return value._id;
-    });
 
-    let _bookings = await Booking.find({ _id: { $in: bookingIds } })
-      .sort({ interesestConfidenceValue: -1 })
-      .populate("authorId");
+    let bookingIds = bookings.map((value) => {return value._id;});
+    console.log(bookings);
+    let _bookings = await Booking.find(
+      {'_id':{$in: bookingIds}},
+    ).sort({interesestConfidenceValue: -1}).populate("authorId");
 
-    return sendSuccess(
-      res,
-      "Get recommend bookings succesfully",
+    return sendSuccess(res, "Get recommend bookings succesfully",
       _bookings,
-      _bookings.length
+      _bookings.length,
     );
+
+
   } catch (e) {
     console.log(e);
     return sendServerError(res);
@@ -410,15 +387,15 @@ exports.getRecommend = async (req, res) => {
 
 exports.delete = async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
 
-    const applys = await Apply.find({ booking: id }).lean();
+    const applys = await Apply.find({'booking' : id}).lean();
     const applyIds = applys.map((apply) => apply._id);
 
     await Promise.all([
       Booking.findByIdAndDelete(id),
-      Apply.deleteMany({ _id: { $in: applyIds } }),
-      Review.deleteMany({ apply: { $in: applyIds } }),
+      Apply.deleteMany({'_id':{'$in':applyIds}}),
+      Review.deleteMany({'apply':{'$in':applyIds}}),
     ]);
     await Booking.findByIdAndDelete(id);
     return sendSuccess(res, "Delete 1 booking successfully");
@@ -430,68 +407,54 @@ exports.delete = async (req, res) => {
 
 exports.getBookingInChatBot = async (req, res) => {
   try {
+    
     let { type } = req.body.queryResult.parameters;
-    console.log(req.body);
-
+    console.log(req);
+    
     let input = {};
-    if (type == "from_input") {
+    if (type == 'from_input'){
       input = {
-        startPointLat: Number(req.body.queryResult.parameters.startPointLat),
+        startPointLat: Number(req.body.queryResult.parameters.startPointLat), 
         startPointLong: Number(req.body.queryResult.parameters.startPointLong),
         endPointLat: Number(req.body.queryResult.parameters.endPointLat),
         endPointLong: Number(req.body.queryResult.parameters.endPointLong),
         time: new Date(),
-      };
+      }
     }
-    if (type == "from_user") {
-      let user = await User.findById(req.user.user_id).populate("booking");
-      if (user.booking == null) {
-        return sendError(
-          res,
-          "Current user not have interact (apply, watch, save) with any booking"
-        );
+    if (type == 'from_user'){
+      let user = await User.findById(req.user.user_id).populate('booking');
+      if (user.booking == null){
+        return sendError(res, 'Current user not have interact (apply, watch, save) with any booking')
       }
       input = {
-        startPointLat: Number(user.booking.startPointLat),
+        startPointLat: Number(user.booking.startPointLat), 
         startPointLong: Number(user.booking.startPointLong),
         endPointLat: Number(user.booking.endPointLat),
         endPointLong: Number(user.booking.endPointLong),
         time: new Date(),
-      };
+      }
     }
+    
 
     let bookings = await recommedBookings(input);
 
-    let bookingIds = bookings.map((value) => {
-      return value._id;
-    });
 
-    let _bookings = await Booking.find({ _id: { $in: bookingIds } })
-      .sort({ interesestConfidenceValue: -1 })
-      .populate("authorId");
+    let bookingIds = bookings.map((value) => {return value._id;});
+    console.log(bookings);
+    let _bookings = await Booking.find(
+      {'_id':{$in: bookingIds}},
+    ).sort({interesestConfidenceValue: -1}).populate("authorId");
+
+    console.log(_bookings);
 
     return res.send({
-      fulfillmentMessages: [
-        {
-          text: {
-            text: ["Đây là chuyến đi phù hợp nhất cho bạn"],
-          },
-        },
-      ],
-      payload: _bookings[0],
+      fulfillmentText: JSON.stringify(_bookings[0]).replace('/','')
     });
+
   } catch (e) {
     console.log(e);
     return res.send({
-      fulfillmentMessages: [
-        {
-          text: {
-            text: ["Xảy ra lổi"],
-          },
-        },
-      ],
-
-      payload: null,
+      fulfillmentText: '',
     });
   }
 };
