@@ -4,8 +4,7 @@ const Review = require("../models/review.js");
 const User = require("../models/user.js");
 const mongoose = require("mongoose");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
-const {splitAddress, stringToSlug,  geoHash,
-const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
+
 const {splitAddress, stringToSlug,  geoHash,
   timeDifference,
   compareGeohashes,} = require("../utils/utils.js");
