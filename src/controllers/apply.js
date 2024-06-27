@@ -5,7 +5,7 @@ const Notification = require("../models/notification.js");
 const User = require("../models/user.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const dataName = "booking";
-const { sendEvent } = require("../sockets/function/socket.function.js");
+const { sendEvent } = require("../sockets/socket.js");
 const { APPLY_STATE, BOOKING_STATUS } = require("../contrants.js");
 const {saveNewCaseBase } = require("../service/recommed_system/recommend_system.js");
 
