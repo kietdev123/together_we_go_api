@@ -5,6 +5,7 @@ const SocketIdData = require('./data/socket_id.data.js');
 const { userConnected, userDisconnected } = require("./function/socket.function.js");
 const ChatRoom = require('../models/chat_room.js');
 const Notification = require("../models/notification.js");
+const mongoose = require("mongoose");
 
 const jwt = require("jsonwebtoken");
 
