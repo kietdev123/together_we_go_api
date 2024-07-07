@@ -23,6 +23,34 @@ const {
   saveNewCaseBase,
 } = require("../service/recommed_system/recommend_system.js");
 
+
+const customUser = async (user) => {
+  try {
+    let reviewNum = 0, applyNum = 0, bookingNum = 0;
+    await Promise.all([
+      Review.find({'receiver' : new mongoose.Types.ObjectId(user.id)})
+      .then((value) => { 
+    
+        reviewNum = value.length;
+
+      }),
+      Apply.find({'applyer' : new mongoose.Types.ObjectId(user.id)})
+      .then((value) => { applyNum = value.length;}),
+      Booking.find({'authorId' : new mongoose.Types.ObjectId(user.id)})
+      .then((value) => { bookingNum = value.length;}),
+    ]);
+
+    return  {
+      ...user,
+      reviewNum,
+      applyNum,
+      bookingNum,
+    }
+  } catch (e) {
+    return null;
+  }
+};
+
 exports.create = async (req, res) => {
   try {
     let user = await User.findById(req.user.user_id);
@@ -343,10 +371,13 @@ exports.getList = async (req, res) => {
   for (let i = 0; i < data.length ; i ++){
     bookings[0].data[i].id = bookings[0].data[i]._id;
     bookings[0].data[i].authorId.id = bookings[0].data[i].authorId._id;
+    
     delete bookings[0].data[i]._id;
     delete bookings[0].data[i].authorId._id;
     delete bookings[0].data[i].__v;
     delete bookings[0].data[i].authorId.__v;
+
+    bookings[0].data[i].authorId = await customUser(bookings[0].data[i].authorId);
   }
     return sendSuccess(res,"Get bookings succesfully", bookings[0].data, bookings[0].count[0].count);
 
@@ -387,25 +418,72 @@ exports.getRecommend = async (req, res) => {
       };
     }
 
-    let bookings = await recommedBookings(input);
+    let _bookings = await recommedBookings(input);
 
-    let bookingIds = bookings.map((value) => {
+    let bookingIds = _bookings.map((value) => {
       return value._id;
     });
+    
+    let bookings = await Booking.aggregate([
+      { $match: { _id: { $in: bookingIds }} },
+      {
+        $addFields: {
+          isFavorite: {
+            $cond: {
+              // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userFavorites"] }, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false, // Set isHave to false otherwise
+            },
+          },
+          isMayFavorite: {
+            $cond: {
+              // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userMayFavorites"] }, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false, // Set isHave to false otherwise
+            },
+          },
+        },
+      },
+      { $sort: {
+        interesestConfidenceValue: -1
+      } }, // Sort the matched documents
 
-    let _bookings = await Booking.find({ _id: { $in: bookingIds } })
-      .sort({ interesestConfidenceValue: -1 })
-      .populate("authorId");
+    { $facet: {
+      count:  [{ $count: "count" }],
+      data: [
+        { $lookup: { // Populate the "authorId" field
+            from: "users", // Assuming "authors" is the collection name
+            localField: "authorId",
+            foreignField: "_id",
+            as: "authorId"
+          }
+        },
+        { $unwind: "$authorId" } // Deconstruct the "author" array
+      ]
+    }},  
+  ]);
+  
 
-    return sendSuccess(
-      res,
-      "Get recommend bookings succesfully",
-      _bookings,
-      _bookings.length
-    );
+  let data = bookings[0].data;
+  for (let i = 0; i < data.length ; i ++){
+    bookings[0].data[i].id = bookings[0].data[i]._id;
+    bookings[0].data[i].authorId.id = bookings[0].data[i].authorId._id;
+    
+    delete bookings[0].data[i]._id;
+    delete bookings[0].data[i].authorId._id;
+    delete bookings[0].data[i].__v;
+    delete bookings[0].data[i].authorId.__v;
+
+    bookings[0].data[i].authorId = await customUser(bookings[0].data[i].authorId);
+  }
+    return sendSuccess(res,"Get recommend bookings succesfully", bookings[0].data, bookings[0].count[0].count);
+
   } catch (e) {
     console.log(e);
-    return sendServerError(res);
+    // return sendServerError(res);
+    return sendSuccess(res,"Get recommend bookings succesfully", [], 0);
   }
 };
 
@@ -461,16 +539,67 @@ exports.getBookingInChatBot = async (req, res) => {
       };
     }
 
-    let bookings = await recommedBookings(input);
+    let _bookings = await recommedBookings(input);
 
-    let bookingIds = bookings.map((value) => {
+    let bookingIds = _bookings.map((value) => {
       return value._id;
     });
 
-    let _bookings = await Booking.find({ _id: { $in: bookingIds } })
-      .sort({ interesestConfidenceValue: -1 })
-      .populate("authorId");
+    let bookings = await Booking.aggregate([
+      { $match: { _id: { $in: bookingIds }} },
+      {
+        $addFields: {
+          isFavorite: {
+            $cond: {
+              // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userFavorites"] }, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false, // Set isHave to false otherwise
+            },
+          },
+          isMayFavorite: {
+            $cond: {
+              // Conditionally set isHave based on the presence of value_x in users
+              if: { $in: [req.user.user_id, "$userMayFavorites"] }, // Check if value_x exists in the users array
+              then: true, // Set isHave to true if value_x exists
+              else: false, // Set isHave to false otherwise
+            },
+          },
+        },
+      },
+      { $sort: {
+        interesestConfidenceValue: -1
+      } }, // Sort the matched documents
 
+    { $facet: {
+      count:  [{ $count: "count" }],
+      data: [
+        { $lookup: { // Populate the "authorId" field
+            from: "users", // Assuming "authors" is the collection name
+            localField: "authorId",
+            foreignField: "_id",
+            as: "authorId"
+          }
+        },
+        { $unwind: "$authorId" } // Deconstruct the "author" array
+      ]
+    }},  
+  ]);
+  
+
+  let data = bookings[0].data;
+  for (let i = 0; i < data.length ; i ++){
+    bookings[0].data[i].id = bookings[0].data[i]._id;
+    bookings[0].data[i].authorId.id = bookings[0].data[i].authorId._id;
+    
+    delete bookings[0].data[i]._id;
+    delete bookings[0].data[i].authorId._id;
+    delete bookings[0].data[i].__v;
+    delete bookings[0].data[i].authorId.__v;
+
+    bookings[0].data[i].authorId = await customUser(bookings[0].data[i].authorId);
+  }
+      
     return res.send({
       fulfillmentMessages: [
         {
@@ -479,7 +608,7 @@ exports.getBookingInChatBot = async (req, res) => {
           },
         },
       ],
-      payload: _bookings[0],
+      payload:bookings[0].data[0],
     });
   } catch (e) {
     console.log(e);

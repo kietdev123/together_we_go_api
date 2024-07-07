@@ -121,7 +121,9 @@ exports.update = async (req, res, next) => {
 
     // Send reload apply to applyer
     console.log(data.applyer.id.toString(),' ',req.user.user_id.toString());
-    sendEvent(data.applyer.id.toString(),"reload_apply", {});
+    sendEvent(data.applyer.id.toString(),"reload_apply", {
+      
+    });
 
     sendEvent(req.user.user_id.toString(),"reload_apply", {});
 

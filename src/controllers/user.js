@@ -1,5 +1,5 @@
 const User = require("../models/user");
-const Review = require("../models/user");
+const Review = require("../models/review");
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
@@ -15,14 +15,8 @@ exports.getOne = async (req, res, next) => {
     await Promise.all([
       Review.find({'receiver' : new mongoose.Types.ObjectId(req.params.id)})
       .then((value) => { 
-      
-        if (value.length > 0) {
-          let res = 0;
-          for (let i = 0 ; i < value.length ; i++){
-            res = res + value[i].star;
-          }
-          reviewNum = res / value.length;
-        }
+    
+        reviewNum = value.length;
 
       }),
       Apply.find({'applyer' : new mongoose.Types.ObjectId(req.params.id)})

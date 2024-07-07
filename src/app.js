@@ -22,6 +22,7 @@ const notificationRoutes = require("./routes/notification.js");
 const locationHistorySearchRoutes = require("./routes/location_history_search.js");
 const locationSavedRoutes = require("./routes/location_saved.js");
 const chatBotRoutes = require("./routes/chatbot.js");
+const testRoutes = require("./routes/test.js");
 
 const statisticsRoutes = require("./routes/statistics.js");
 const morgan =  require("morgan");
@@ -72,6 +73,8 @@ app.use("/api/location-history-search", verifyToken, locationHistorySearchRoutes
 app.use("/api/location-saved", verifyToken, locationSavedRoutes);
 app.use("/api/statistics", verifyToken, statisticsRoutes);
 app.use("/api/chatbot", verifyToken, chatBotRoutes);
+
+app.use("/api/test", testRoutes);
 
 
 module.exports = app;
