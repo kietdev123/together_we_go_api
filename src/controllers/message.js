@@ -4,6 +4,8 @@ const { sendSuccess, sendError, sendServerError} = require("../utils/client.js")
 const dataName = "message";
 const mongoose = require("mongoose");
 const chatFeature = require("../sockets/features/chat.feature.js");
+const {sendMessage} = require("../sockets/socket.js");
+
 exports.create = async (req, res, next) => {
   try {
     let data = new Message({
@@ -25,7 +27,7 @@ exports.create = async (req, res, next) => {
       })
     ]);
     
-    chatFeature.sendMessage(message[0]);
+    sendMessage(message[0]);
 
     return sendSuccess(res, `${dataName} added succesfully`, message[0]);
 

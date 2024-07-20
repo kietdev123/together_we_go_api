@@ -3,9 +3,9 @@ const cloudinary = require("cloudinary");
 const { ErrorHandler } = require("../utils/errorHandler");
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: 'dxoblxypq',
+  api_key: '948192272522128',
+  api_secret: 'jms91MYN0ZKY4X7t9E2t8GgRrXM',
 });
 
 const memoryStorage = multer.memoryStorage();

@@ -65,7 +65,7 @@ exports.login = async (req, res, next) => {
       // Create token
       const access_token = jwt.sign(
         { user_id: user.id, role : user.role, email : user.email },
-        process.env.ACCESS_TOKEN_KEY,
+       'SADASDADASMDAS213012123smsdsiiJiNiIInNN.23l23',
         {
           expiresIn: "365d",
         }
@@ -74,7 +74,7 @@ exports.login = async (req, res, next) => {
       // Create token
       const refresh_token = jwt.sign(
         { user_id: user.id, role : user.role, email : user.email },
-        process.env.REFRESH_TOKEN_KEY,
+        'SDKLK23KLK23LK2LKSIO23JKLjkiKJkjkjkjoioi23232',
         {
           expiresIn: "30d",
         }
@@ -120,7 +120,7 @@ exports.loginWithGoogle = async (req, res, next) => {
     // Create token
     const access_token = jwt.sign(
       { user_id: user.id, role : user.role, email : user.email },
-      process.env.ACCESS_TOKEN_KEY,
+      'SADASDADASMDAS213012123smsdsiiJiNiIInNN.23l23',
       {
         expiresIn: "2h",
       }
@@ -129,7 +129,7 @@ exports.loginWithGoogle = async (req, res, next) => {
     // Create token
     const refresh_token = jwt.sign(
       { user_id: user.id, role : user.role, email : user.email },
-      process.env.REFRESH_TOKEN_KEY,
+      'SDKLK23KLK23LK2LKSIO23JKLjkiKJkjkjkjoioi23232',
       {
         expiresIn: "30d",
       }
@@ -161,12 +161,12 @@ exports.refresh = async (req, res, next) => {
         .send("A refresh token is required for refresh access token");
     }
     try {
-      const decoded = jwt.verify(token, process.env.REFRESH_TOKEN_KEY);
+      const decoded = jwt.verify(token, 'SDKLK23KLK23LK2LKSIO23JKLjkiKJkjkjkjoioi23232');
       req.user = decoded;
       
       const access_token = jwt.sign(
         { user_id: req.user.user_id,  role : req.user.role },
-        process.env.ACCESS_TOKEN_KEY,
+        'SADASDADASMDAS213012123smsdsiiJiNiIInNN.23l23',
         {
           expiresIn: "2h",
         }

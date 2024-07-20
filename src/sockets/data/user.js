@@ -8,6 +8,7 @@ let users = {};
 // }
 
 exports.get = async (uid = "") => {
+  console.log(users)
   return socketIds[uid];
 };
 

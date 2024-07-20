@@ -2,9 +2,10 @@ const mongoose = require("mongoose");
 const Apply = require("../models/apply");
 const Booking = require("../models/booking");
 const Notification = require("../models/notification.js");
+const User = require("../models/user.js");
 const { sendSuccess, sendError, sendServerError} = require("../utils/client.js");
 const dataName = "booking";
-const { sendEvent } = require("../sockets/function/socket.function.js");
+const { sendEvent } = require("../sockets/socket.js");
 const { APPLY_STATE, BOOKING_STATUS } = require("../contrants.js");
 const {saveNewCaseBase } = require("../service/recommed_system/recommend_system.js");
 
@@ -120,9 +121,13 @@ exports.update = async (req, res, next) => {
 
     // Send reload apply to applyer
     console.log(data.applyer.id.toString(),' ',req.user.user_id.toString());
-    sendEvent(data.applyer.id.toString(),"reload_apply", {});
+    sendEvent(data.applyer.id.toString(),"reload_apply", {
+      notification_body: text,
+    });
 
-    sendEvent(req.user.user_id.toString(),"reload_apply", {});
+    sendEvent(req.user.user_id.toString(),"reload_apply", {
+      notification_body: text,
+    });
 
     return sendSuccess(res, `Update 1 ${dataName} successfully`, data);
   } catch (err) {

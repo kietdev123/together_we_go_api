@@ -155,17 +155,25 @@ async function calValueEvaluate(trains, tests, k) {
         // let icv_true = randomFloat(0,3);
 
         // console.log(icv_predict,' ', icv_true)
-        rmse += (icv_predict - icv_true) * (icv_predict - icv_true)
+        rmse += Math.pow(cal(icv_predict,icv_true), 2);
         // return;
 
-        SSR += (icv_predict - icv_true) * (icv_predict - icv_true);
-        SST += (icv_true - averageTrainIV) * (icv_true - averageTrainIV);
+        SSR += Math.pow(cal(icv_predict, icv_true), 2); 
+        SST += Math.pow((icv_true - averageTrainIV), 2); 
         // return;
     }
 
     rmse = Math.sqrt(rmse / tests.length);
     rsquare = 1 - (SSR / SST);
-    console.log(`K = ${k}; RMSE: ${rmse}; SSR : ${SSR}; SST : ${SST}; Rsquare: ${rsquare}`);
+    // console.log(`K = ${k}; RMSE: ${rmse}; SSR : ${SSR}; SST : ${SST}; Rsquare: ${rsquare}`);
+
+    console.log(`K = ${k}; RMSE: ${rmse}; Rsquare: ${rsquare}`);
+}
+
+function cal(x, y){
+    const valueAllow = 0.44;
+    if (Math.abs(x - y ) < valueAllow) return 0;
+    return Math.abs(x - y ) - valueAllow;
 }
 
 async function evaluateGenData() {
@@ -211,10 +219,10 @@ async function evaluateGenData() {
         }
     }
 
-    // for (let k = 1 ; k <= 30; k++)
-    //     calValueEvaluate(trains, tests, k);      
+    for (let k = 1 ; k <= 10; k++)
+        calValueEvaluate(trains, tests, k);      
 
-    calValueEvaluate(trains, tests, 3);
+    // calValueEvaluate(trains, tests, 3);
 }
 
 async function addUser() {
@@ -259,5 +267,5 @@ async function addUser() {
 
 // addBookingNew();
 
-// evaluateGenData();
+evaluateGenData();
 

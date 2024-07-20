@@ -1,7 +1,7 @@
 const nodemailer = require("nodemailer");
 const Mailgen = require('mailgen');
-const EMAIL = process.env.EMAIL;
-const PASSWORD = process.env.PASSWORD;
+const EMAIL = 'nguyenhoangkiet.azure.acc02@gmail.com';
+const PASSWORD = 'ajddvqhfmmgijuoi';
 
 const send_gmail = async () => {
   try {

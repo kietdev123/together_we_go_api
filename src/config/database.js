@@ -5,7 +5,7 @@ const { MONGODB_URI } = process.env;
 exports.connect = () => {
   // Connecting to the database
   mongoose
-    .connect(MONGODB_URI, {
+    .connect('mongodb+srv://vercel-admin-user:xz3IckPXwH3uyR2t@cluster0.ynhdj.mongodb.net/test', {
       // useNewUrlParser: true,
       // useUnifiedTopology: true,
       // useCreateIndex: true,

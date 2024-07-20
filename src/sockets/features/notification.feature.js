@@ -21,7 +21,7 @@ exports.send = async (fromUserId, toUserId, text) => {
         })   
       ]);
 
-      let client_socket_id = await UserData.get(toUserId).socket_id;
+      let client_socket_id = await UserData.get(toUserId);
 
       io.to(client_socket_id).emit("receive_notification", {
         notification_body: fromUser.first_name + ' ' + text,
